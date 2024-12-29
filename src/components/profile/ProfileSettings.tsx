@@ -26,6 +26,8 @@ const ProfileSettings = ({ open, onOpenChange, userEmail }: ProfileSettingsProps
   useEffect(() => {
     const fetchProfile = async () => {
       try {
+        if (!open) return; // Don't fetch if dialog is closed
+        
         setIsLoading(true);
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
@@ -54,13 +56,13 @@ const ProfileSettings = ({ open, onOpenChange, userEmail }: ProfileSettingsProps
       }
     };
 
-    if (open) {
-      fetchProfile();
-    }
+    fetchProfile();
   }, [open]);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isLoading) return;
+    
     setIsLoading(true);
 
     try {
@@ -124,7 +126,7 @@ const ProfileSettings = ({ open, onOpenChange, userEmail }: ProfileSettingsProps
               disabled={isLoading}
             />
             <p className="text-sm text-muted-foreground">
-              This will be your custom URL: {window.location.origin}/{username}
+              This will be your custom URL: mystash.tech/{username}
             </p>
           </div>
           <div className="flex justify-end space-x-2">
