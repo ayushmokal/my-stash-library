@@ -55,11 +55,12 @@ const ProductFormFields = ({
         name="affiliateLink"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Amazon Affiliate Link (Optional)</FormLabel>
+            <FormLabel>Product Link (Optional)</FormLabel>
             <FormControl>
               <Input
                 {...field}
                 type="url"
+                placeholder="Enter product URL or Amazon affiliate link"
                 onChange={(e) => {
                   field.onChange(e);
                   onAffiliateLinkChange(e);
