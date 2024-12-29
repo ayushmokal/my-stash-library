@@ -45,7 +45,7 @@ const Landing = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-b from-[#E5DEFF] via-[#F1F0FB] to-white">
       {/* Banner Section */}
-      <div className="w-full bg-gradient-to-r from-[#E5DEFF]/50 via-[#F1F0FB]/70 to-[#E5DEFF]/50 py-12 mb-8 text-center backdrop-blur-sm">
+      <div className="w-full py-12 mb-8 text-center">
         <h1 className="text-4xl font-bold text-[#1A1F2C] mb-2">My Stash</h1>
         <p className="text-[#1A1F2C]/80">Organize and share your favorite products</p>
       </div>
