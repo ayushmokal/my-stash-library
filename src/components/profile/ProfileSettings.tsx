@@ -30,55 +30,71 @@ const ProfileSettings = ({ open, onOpenChange, userEmail }: ProfileSettingsProps
   const [themeColor, setThemeColor] = useState("#6B4E9B");
   const [backgroundColor, setBackgroundColor] = useState("#FFFFFF");
   const [layoutStyle, setLayoutStyle] = useState<"grid" | "list">("grid");
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+    return () => setIsMounted(false);
+  }, []);
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        if (!open) return;
+        if (!open || !isMounted) return;
         
         setIsLoading(true);
         const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const { data: profile, error } = await supabase
-            .from('profiles')
-            .select('username, theme_color, background_color, layout_style')
-            .eq('id', user.id)
-            .maybeSingle();
-          
-          if (error) {
-            console.error('Error fetching profile:', error);
-            toast.error("Failed to load profile");
-            return;
-          }
+        
+        if (!user || !isMounted) return;
 
-          if (profile) {
-            setUsername(profile.username || "");
-            setCurrentUsername(profile.username || "");
-            setThemeColor(profile.theme_color || "#6B4E9B");
-            setBackgroundColor(profile.background_color || "#FFFFFF");
-            setLayoutStyle(profile.layout_style as "grid" | "list" || "grid");
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('username, theme_color, background_color, layout_style')
+          .eq('id', user.id)
+          .maybeSingle();
+        
+        if (error) {
+          console.error('Error fetching profile:', error);
+          if (isMounted) {
+            toast.error("Failed to load profile");
           }
+          return;
+        }
+
+        if (profile && isMounted) {
+          setUsername(profile.username || "");
+          setCurrentUsername(profile.username || "");
+          setThemeColor(profile.theme_color || "#6B4E9B");
+          setBackgroundColor(profile.background_color || "#FFFFFF");
+          setLayoutStyle((profile.layout_style as "grid" | "list") || "grid");
         }
       } catch (error) {
         console.error('Error:', error);
-        toast.error("Failed to load profile");
+        if (isMounted) {
+          toast.error("Failed to load profile");
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
     fetchProfile();
-  }, [open]);
+  }, [open, isMounted]);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isLoading) return;
+    if (isLoading || !isMounted) return;
     
     setIsLoading(true);
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("No user found");
+      if (!user || !isMounted) {
+        toast.error("No user found");
+        return;
+      }
 
       // Check if username is already taken (if changed)
       if (username !== currentUsername) {
@@ -88,7 +104,7 @@ const ProfileSettings = ({ open, onOpenChange, userEmail }: ProfileSettingsProps
           .eq('username', username)
           .maybeSingle();
 
-        if (existingUser) {
+        if (existingUser && isMounted) {
           toast.error("Username is already taken");
           setIsLoading(false);
           return;
@@ -108,15 +124,25 @@ const ProfileSettings = ({ open, onOpenChange, userEmail }: ProfileSettingsProps
 
       if (error) throw error;
 
-      toast.success("Profile updated successfully!");
-      setCurrentUsername(username);
-      onOpenChange(false);
+      if (isMounted) {
+        toast.success("Profile updated successfully!");
+        setCurrentUsername(username);
+        onOpenChange(false);
+      }
     } catch (error: any) {
-      toast.error(error.message || "Failed to update profile");
+      if (isMounted) {
+        toast.error(error.message || "Failed to update profile");
+      }
     } finally {
-      setIsLoading(false);
+      if (isMounted) {
+        setIsLoading(false);
+      }
     }
   };
+
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
