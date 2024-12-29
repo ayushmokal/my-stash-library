@@ -51,7 +51,11 @@ const HeaderControls = ({
 
   return (
     <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-      <Button variant="outline" onClick={handleShare} className="w-full sm:w-auto">
+      <Button 
+        variant="outline" 
+        onClick={handleShare} 
+        className="w-full sm:w-auto"
+      >
         <Share2 className="mr-2 h-4 w-4" />
         Share my stash
       </Button>
