@@ -39,7 +39,11 @@ const PublicProfileContent = ({ username, categories, products }: PublicProfileC
             if (categoryProducts.length === 0) return null;
 
             return (
-              <CategorySection key={category.id} title={category.name}>
+              <CategorySection 
+                key={category.id} 
+                title={category.name}
+                categoryId={category.id}
+              >
                 {categoryProducts.map((product) => (
                   <PublicProductCard key={product.id} product={product} />
                 ))}
