@@ -1,12 +1,5 @@
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-
-interface Product {
-  id: string;
-  name: string;
-  brand: string | null;
-  image_url: string | null;
-  affiliate_link: string | null;
-}
+import { Product } from "@/types/product";
 
 interface PublicProductCardProps {
   product: Product;

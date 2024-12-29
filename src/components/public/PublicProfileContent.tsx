@@ -3,21 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import CategorySection from "../stash/CategorySection";
 import PublicProductCard from "./PublicProductCard";
-
-interface Category {
-  id: string;
-  name: string;
-}
-
-interface Product {
-  id: string;
-  name: string;
-  brand: string | null;
-  image_url: string | null;
-  affiliate_link: string | null;
-  category_id: string;
-  user_id: string;
-}
+import { Product, Category } from "@/types/product";
 
 interface PublicProfileContentProps {
   username: string;

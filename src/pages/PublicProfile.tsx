@@ -3,20 +3,7 @@ import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import PublicProfileContent from "@/components/public/PublicProfileContent";
-
-interface Category {
-  id: string;
-  name: string;
-}
-
-interface Product {
-  id: string;
-  name: string;
-  brand: string | null;
-  image_url: string | null;
-  affiliate_link: string | null;
-  category_id: string;
-}
+import { Product, Category } from "@/types/product";
 
 const PublicProfile = () => {
   const { username } = useParams();
@@ -36,7 +23,6 @@ const PublicProfile = () => {
           return;
         }
 
-        // Set the username parameter for RLS policies
         const { error: paramError } = await supabase.rpc('set_request_parameter', {
           name: 'username',
           value: username
