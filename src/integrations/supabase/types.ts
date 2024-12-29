@@ -77,6 +77,30 @@ export type Database = {
           },
         ]
       }
+      profile_views: {
+        Row: {
+          created_at: string
+          id: string
+          profile_id: string
+          updated_at: string
+          view_count: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          profile_id: string
+          updated_at?: string
+          view_count?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          profile_id?: string
+          updated_at?: string
+          view_count?: number | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -103,6 +127,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      increment_profile_views: {
+        Args: {
+          profile_id_param: string
+        }
+        Returns: undefined
+      }
       set_request_parameter: {
         Args: {
           name: string

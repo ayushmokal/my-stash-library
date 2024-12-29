@@ -52,6 +52,16 @@ const PublicProfile = () => {
 
         console.log('Found profile:', data);
         setUserId(data.id);
+
+        // Increment view count
+        const { error: incrementError } = await supabase.rpc('increment_profile_views', {
+          profile_id_param: data.id
+        });
+
+        if (incrementError) {
+          console.error('Error incrementing view count:', incrementError);
+        }
+
       } catch (err: any) {
         console.error("Error fetching profile:", err);
         setError(err.message);
@@ -128,6 +138,7 @@ const PublicProfile = () => {
       username={username}
       categories={categories}
       products={products}
+      userId={userId}
     />
   );
 };
