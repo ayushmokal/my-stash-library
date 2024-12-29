@@ -14,16 +14,12 @@ const ProductPreview = ({ name, brand, imageUrl, affiliateLink }: ProductPreview
   return (
     <Card className="overflow-hidden">
       <div className="aspect-square relative">
-        {imageUrl ? (
+        {imageUrl && (
           <img
             src={imageUrl}
             alt={name}
             className="object-cover w-full h-full"
           />
-        ) : (
-          <div className="w-full h-full bg-muted flex items-center justify-center">
-            No image
-          </div>
         )}
       </div>
       <div className="p-4">
