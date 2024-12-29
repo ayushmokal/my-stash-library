@@ -1,5 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ExternalLink, MoreVertical } from "lucide-react";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -42,14 +42,12 @@ const ProductCard = ({ product }: ProductCardProps) => {
       setUser(session?.user ?? null);
     });
 
-    // Initial auth state
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
     });
 
     return () => {
       subscription.unsubscribe();
-      // Cleanup any pending queries
       queryClient.cancelQueries({ queryKey: ["products"] });
     };
   }, [queryClient]);
@@ -85,7 +83,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
   return (
     <>
-      <Card className="group relative flex flex-col overflow-hidden hover:shadow-lg transition-shadow">
+      <Card className="group relative flex flex-col overflow-hidden bg-white hover:shadow-lg transition-shadow">
         {user && (
           <div className="absolute top-2 right-2 z-50">
             <DropdownMenu>
@@ -93,20 +91,13 @@ const ProductCard = ({ product }: ProductCardProps) => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="bg-white/80 backdrop-blur-sm hover:bg-white"
+                  className="h-8 w-8 bg-white/80 backdrop-blur-sm hover:bg-white"
                 >
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent 
-                align="end" 
-                className="w-[200px]"
-                sideOffset={5}
-              >
-                <DropdownMenuItem 
-                  onClick={() => setIsEditDialogOpen(true)}
-                  className="cursor-pointer"
-                >
+              <DropdownMenuContent align="end" className="w-[200px]" sideOffset={5}>
+                <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)} className="cursor-pointer">
                   Edit
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -131,24 +122,17 @@ const ProductCard = ({ product }: ProductCardProps) => {
             </div>
           )}
         </div>
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-xl">{product.name}</CardTitle>
-          {product.brand && (
-            <p className="text-sm text-muted-foreground">{product.brand}</p>
-          )}
+        <CardHeader className="space-y-1 px-4 py-3">
+          <div className="text-sm text-muted-foreground">
+            {product.brand && (
+              <span className="mr-2">{product.brand}</span>
+            )}
+            {product.category_id && (
+              <span className="text-muted-foreground/60">•</span>
+            )}
+          </div>
+          <CardTitle className="text-base font-medium">{product.name}</CardTitle>
         </CardHeader>
-        {product.affiliate_link && (
-          <CardContent>
-            <a
-              href={product.affiliate_link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800"
-            >
-              Buy now <ExternalLink className="ml-1 h-4 w-4" />
-            </a>
-          </CardContent>
-        )}
       </Card>
 
       <Dialog 
@@ -156,7 +140,6 @@ const ProductCard = ({ product }: ProductCardProps) => {
         onOpenChange={(open) => {
           setIsEditDialogOpen(open);
           if (!open) {
-            // Cleanup when dialog closes
             queryClient.invalidateQueries({ queryKey: ["products"] });
           }
         }}
