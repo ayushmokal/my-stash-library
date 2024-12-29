@@ -47,24 +47,6 @@ const ProductFormFields = ({
 
       <FormField
         control={form.control}
-        name="affiliateLink"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Product Link (Optional)</FormLabel>
-            <FormControl>
-              <Input
-                {...field}
-                type="url"
-                placeholder="Enter product URL or Amazon affiliate link"
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
         name="name"
         render={({ field }) => (
           <FormItem>
@@ -93,10 +75,46 @@ const ProductFormFields = ({
 
       <FormField
         control={form.control}
+        name="affiliateLink"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Product Link (Optional)</FormLabel>
+            <FormControl>
+              <Input
+                {...field}
+                type="url"
+                placeholder="Enter product URL or Amazon affiliate link"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="imageUrl"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Image URL (Optional)</FormLabel>
+            <FormControl>
+              <Input
+                {...field}
+                type="url"
+                placeholder="Enter image URL"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
         name="image"
         render={({ field: { onChange, value, ...field } }) => (
           <FormItem>
-            <FormLabel>Product Image (Optional)</FormLabel>
+            <FormLabel>Upload Image (Optional)</FormLabel>
             <FormControl>
               <Input
                 type="file"

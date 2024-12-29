@@ -15,6 +15,7 @@ const formSchema = z.object({
   brand: z.string().optional(),
   affiliateLink: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
   categoryId: z.string().min(1, "Category is required"),
+  imageUrl: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
   image: z.instanceof(FileList).optional(),
 });
 
@@ -42,15 +43,16 @@ const AddProductForm = () => {
       brand: "",
       affiliateLink: "",
       categoryId: "",
+      imageUrl: "",
     },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsUploading(true);
-      let imageUrl = null;
+      let imageUrl = values.imageUrl || null;
 
-      if (values.image?.[0]) {
+      if (!imageUrl && values.image?.[0]) {
         const file = values.image[0];
         const fileExt = file.name.split(".").pop();
         const filePath = `${crypto.randomUUID()}.${fileExt}`;
