@@ -29,9 +29,9 @@ interface StashContentProps {
 const StashContent = ({ categories, products, onAddCategory }: StashContentProps) => {
   if (categories.length === 0) {
     return (
-      <div className="text-center py-12">
-        <h2 className="text-2xl font-semibold mb-4">Welcome to My Stash!</h2>
-        <p className="text-muted-foreground mb-8">
+      <div className="text-center py-8 sm:py-12 px-4">
+        <h2 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4">Welcome to My Stash!</h2>
+        <p className="text-muted-foreground mb-6 sm:mb-8">
           Get started by creating your first category to organize your stuff.
         </p>
         <Button onClick={onAddCategory}>
@@ -43,7 +43,7 @@ const StashContent = ({ categories, products, onAddCategory }: StashContentProps
   }
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-8 sm:space-y-12">
       {categories.map((category) => (
         <CategorySection 
           key={category.id} 

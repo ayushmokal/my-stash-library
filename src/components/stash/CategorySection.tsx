@@ -45,15 +45,15 @@ export const CategorySection = ({ title, categoryId, children }: CategorySection
 
   return (
     <section className="w-full space-y-4 animate-fade-in">
-      <div className="flex items-center justify-between px-4 py-2 bg-stash-gray rounded-lg">
-        <h2 className="text-2xl font-semibold">{title}</h2>
+      <div className="flex items-center justify-between px-3 sm:px-4 py-2 bg-stash-gray rounded-lg">
+        <h2 className="text-xl sm:text-2xl font-semibold">{title}</h2>
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600 hover:bg-red-100">
               <Trash2 className="h-4 w-4" />
             </Button>
           </AlertDialogTrigger>
-          <AlertDialogContent>
+          <AlertDialogContent className="w-[95vw] max-w-[425px] p-4 sm:p-6">
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Category</AlertDialogTitle>
               <AlertDialogDescription>
@@ -70,7 +70,7 @@ export const CategorySection = ({ title, categoryId, children }: CategorySection
           </AlertDialogContent>
         </AlertDialog>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {children}
       </div>
     </section>

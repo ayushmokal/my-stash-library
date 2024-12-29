@@ -140,38 +140,40 @@ const Index = () => {
   }
 
   return (
-    <div className="container py-8 space-y-8">
-      <header className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold">My stash</h1>
-        <HeaderControls
-          userEmail={session.user.email}
-          username={username}
-          onProfileOpen={() => setIsProfileOpen(true)}
-          onAddCategoryOpen={() => setIsAddCategoryOpen(true)}
-          onSignOut={handleSignOut}
+    <div className="min-h-screen w-full">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 space-y-6 sm:space-y-8">
+        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <h1 className="text-2xl sm:text-3xl font-bold">My stash</h1>
+          <HeaderControls
+            userEmail={session?.user?.email}
+            username={username}
+            onProfileOpen={() => setIsProfileOpen(true)}
+            onAddCategoryOpen={() => setIsAddCategoryOpen(true)}
+            onSignOut={handleSignOut}
+          />
+        </header>
+
+        <ProfileSettings
+          open={isProfileOpen}
+          onOpenChange={setIsProfileOpen}
+          userEmail={session?.user?.email}
         />
-      </header>
 
-      <ProfileSettings
-        open={isProfileOpen}
-        onOpenChange={setIsProfileOpen}
-        userEmail={session.user.email}
-      />
+        <Dialog open={isAddCategoryOpen} onOpenChange={setIsAddCategoryOpen}>
+          <DialogContent className="w-[95vw] max-w-[425px] p-4 sm:p-6">
+            <DialogHeader>
+              <DialogTitle>Add New Category</DialogTitle>
+            </DialogHeader>
+            <AddCategoryForm />
+          </DialogContent>
+        </Dialog>
 
-      <Dialog open={isAddCategoryOpen} onOpenChange={setIsAddCategoryOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Add New Category</DialogTitle>
-          </DialogHeader>
-          <AddCategoryForm />
-        </DialogContent>
-      </Dialog>
-
-      <StashContent
-        categories={categories}
-        products={products}
-        onAddCategory={() => setIsAddCategoryOpen(true)}
-      />
+        <StashContent
+          categories={categories}
+          products={products}
+          onAddCategory={() => setIsAddCategoryOpen(true)}
+        />
+      </div>
     </div>
   );
 };
