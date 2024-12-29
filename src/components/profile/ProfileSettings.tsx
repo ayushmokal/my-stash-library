@@ -1,7 +1,4 @@
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -17,13 +14,8 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import ProfileTab from "./ProfileTab";
+import AppearanceTab from "./AppearanceTab";
 
 interface ProfileSettingsProps {
   open: boolean;
@@ -64,7 +56,7 @@ const ProfileSettings = ({ open, onOpenChange, userEmail }: ProfileSettingsProps
             setCurrentUsername(profile.username || "");
             setThemeColor(profile.theme_color || "#6B4E9B");
             setBackgroundColor(profile.background_color || "#FFFFFF");
-            setLayoutStyle(profile.layout_style || "grid");
+            setLayoutStyle(profile.layout_style as "grid" | "list" || "grid");
           }
         }
       } catch (error) {
@@ -141,109 +133,27 @@ const ProfileSettings = ({ open, onOpenChange, userEmail }: ProfileSettingsProps
             <TabsTrigger value="appearance">Appearance</TabsTrigger>
           </TabsList>
           <TabsContent value="profile">
-            <form onSubmit={handleUpdateProfile} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" value={userEmail} disabled />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  placeholder="Choose a username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
-                  disabled={isLoading}
-                />
-                <p className="text-sm text-muted-foreground">
-                  This will be your custom URL: mystash.tech/{username}
-                </p>
-              </div>
-              <div className="flex justify-end space-x-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => onOpenChange(false)}
-                  disabled={isLoading}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isLoading || !username}>
-                  Save Changes
-                </Button>
-              </div>
-            </form>
+            <ProfileTab
+              userEmail={userEmail}
+              username={username}
+              setUsername={setUsername}
+              isLoading={isLoading}
+              onCancel={() => onOpenChange(false)}
+              onSubmit={handleUpdateProfile}
+            />
           </TabsContent>
           <TabsContent value="appearance">
-            <form onSubmit={handleUpdateProfile} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="themeColor">Theme Color</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="themeColor"
-                    type="color"
-                    value={themeColor}
-                    onChange={(e) => setThemeColor(e.target.value)}
-                    className="w-12 h-12 p-1 cursor-pointer"
-                    disabled={isLoading}
-                  />
-                  <Input
-                    value={themeColor}
-                    onChange={(e) => setThemeColor(e.target.value)}
-                    placeholder="#6B4E9B"
-                    disabled={isLoading}
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="backgroundColor">Background Color</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="backgroundColor"
-                    type="color"
-                    value={backgroundColor}
-                    onChange={(e) => setBackgroundColor(e.target.value)}
-                    className="w-12 h-12 p-1 cursor-pointer"
-                    disabled={isLoading}
-                  />
-                  <Input
-                    value={backgroundColor}
-                    onChange={(e) => setBackgroundColor(e.target.value)}
-                    placeholder="#FFFFFF"
-                    disabled={isLoading}
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="layoutStyle">Layout Style</Label>
-                <Select
-                  value={layoutStyle}
-                  onValueChange={(value: "grid" | "list") => setLayoutStyle(value)}
-                  disabled={isLoading}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a layout style" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="grid">Grid</SelectItem>
-                    <SelectItem value="list">List</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex justify-end space-x-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => onOpenChange(false)}
-                  disabled={isLoading}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isLoading}>
-                  Save Changes
-                </Button>
-              </div>
-            </form>
+            <AppearanceTab
+              themeColor={themeColor}
+              setThemeColor={setThemeColor}
+              backgroundColor={backgroundColor}
+              setBackgroundColor={setBackgroundColor}
+              layoutStyle={layoutStyle}
+              setLayoutStyle={setLayoutStyle}
+              isLoading={isLoading}
+              onCancel={() => onOpenChange(false)}
+              onSubmit={handleUpdateProfile}
+            />
           </TabsContent>
         </Tabs>
       </DialogContent>
