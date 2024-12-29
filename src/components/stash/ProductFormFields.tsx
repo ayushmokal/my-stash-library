@@ -1,7 +1,6 @@
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 import * as z from "zod";
 
@@ -13,15 +12,11 @@ interface Category {
 interface ProductFormFieldsProps {
   form: UseFormReturn<any>;
   categories: Category[];
-  isFetchingAmazon: boolean;
-  onAffiliateLinkChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 const ProductFormFields = ({ 
   form, 
-  categories, 
-  isFetchingAmazon, 
-  onAffiliateLinkChange 
+  categories
 }: ProductFormFieldsProps) => {
   return (
     <>
@@ -61,19 +56,8 @@ const ProductFormFields = ({
                 {...field}
                 type="url"
                 placeholder="Enter product URL or Amazon affiliate link"
-                onChange={(e) => {
-                  field.onChange(e);
-                  onAffiliateLinkChange(e);
-                }}
-                disabled={isFetchingAmazon}
               />
             </FormControl>
-            {isFetchingAmazon && (
-              <div className="flex items-center text-sm text-muted-foreground">
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Fetching product details...
-              </div>
-            )}
             <FormMessage />
           </FormItem>
         )}

@@ -21,7 +21,6 @@ const formSchema = z.object({
 
 const AddProductForm = () => {
   const [isUploading, setIsUploading] = useState(false);
-  const [isFetchingAmazon, setIsFetchingAmazon] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
@@ -47,40 +46,6 @@ const AddProductForm = () => {
       categoryId: "",
     },
   });
-
-  const fetchAmazonProduct = async (url: string) => {
-    try {
-      setIsFetchingAmazon(true);
-      const response = await supabase.functions.invoke('fetch-amazon-product', {
-        body: { url }
-      });
-
-      if (response.error) {
-        throw new Error(response.error.message || 'Failed to fetch product data');
-      }
-
-      const data = response.data;
-      console.log('Amazon product data:', data);
-      
-      if (data.name) form.setValue("name", data.name);
-      if (data.brand) form.setValue("brand", data.brand);
-      if (data.image_url) {
-        setPreviewUrl(data.image_url);
-        // Convert image URL to File object
-        const imageResponse = await fetch(data.image_url);
-        const blob = await imageResponse.blob();
-        const file = new File([blob], "product-image.jpg", { type: "image/jpeg" });
-        const fileList = new DataTransfer();
-        fileList.items.add(file);
-        form.setValue("image", fileList.files);
-      }
-    } catch (error: any) {
-      console.error('Error fetching Amazon product:', error);
-      toast.error(error.message || "Failed to fetch product data");
-    } finally {
-      setIsFetchingAmazon(false);
-    }
-  };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
@@ -138,13 +103,6 @@ const AddProductForm = () => {
     }
   };
 
-  const handleAffiliateLinkChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const url = e.target.value;
-    if (url && url.includes("amazon")) {
-      await fetchAmazonProduct(url);
-    }
-  };
-
   const watchedValues = form.watch();
 
   return (
@@ -165,14 +123,12 @@ const AddProductForm = () => {
           <ProductFormFields
             form={form}
             categories={categories}
-            isFetchingAmazon={isFetchingAmazon}
-            onAffiliateLinkChange={handleAffiliateLinkChange}
           />
 
           <Button 
             type="submit" 
             className="w-full mt-4" 
-            disabled={isUploading || isFetchingAmazon}
+            disabled={isUploading}
           >
             {isUploading ? (
               <>
