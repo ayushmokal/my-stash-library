@@ -1,13 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ExternalLink, MoreVertical, GripVertical } from "lucide-react";
+import { ExternalLink, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +15,7 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import ProductMenu from "./ProductMenu";
 
 interface ProductCardProps {
   product: {
@@ -105,36 +99,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
         {user && (
           <>
             <div className="absolute top-2 right-2 z-50">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="bg-white/80 backdrop-blur-sm hover:bg-white"
-                  >
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent 
-                  align="end" 
-                  className="w-[200px]"
-                  sideOffset={5}
-                >
-                  <DropdownMenuItem 
-                    onClick={() => setIsEditDialogOpen(true)}
-                    className="cursor-pointer"
-                  >
-                    Edit
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem 
-                    onClick={handleDelete}
-                    className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
-                  >
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <ProductMenu
+                onEdit={() => setIsEditDialogOpen(true)}
+                onDelete={handleDelete}
+              />
             </div>
             <div 
               className="absolute top-2 left-2 z-50 cursor-move touch-none"
@@ -157,15 +125,15 @@ const ProductCard = ({ product }: ProductCardProps) => {
               <img
                 src={product.image_url}
                 alt={product.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
             </div>
           )}
         </div>
         <CardHeader className="space-y-1">
-          <CardTitle className="text-xl">{product.name}</CardTitle>
+          <CardTitle className="text-xl line-clamp-2">{product.name}</CardTitle>
           {product.brand && (
-            <p className="text-sm text-muted-foreground">{product.brand}</p>
+            <p className="text-sm text-muted-foreground line-clamp-1">{product.brand}</p>
           )}
         </CardHeader>
         {product.affiliate_link && (
