@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import CategorySection from "./CategorySection";
 import AddStuffCard from "./AddStuffCard";
 import ProductCard from "./ProductCard";
+import CategorySkeleton from "./CategorySkeleton";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
@@ -24,9 +25,20 @@ interface StashContentProps {
   categories: Category[];
   products: Product[];
   onAddCategory: () => void;
+  isLoading?: boolean;
 }
 
-const StashContent = ({ categories, products, onAddCategory }: StashContentProps) => {
+const StashContent = ({ categories, products, onAddCategory, isLoading }: StashContentProps) => {
+  if (isLoading) {
+    return (
+      <div className="space-y-8 sm:space-y-12">
+        {[1, 2].map((i) => (
+          <CategorySkeleton key={i} />
+        ))}
+      </div>
+    );
+  }
+
   if (categories.length === 0) {
     return (
       <div className="text-center py-8 sm:py-12 px-4">

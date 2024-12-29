@@ -131,14 +131,6 @@ const Index = () => {
     );
   }
 
-  if (categoriesLoading || productsLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">Loading your stash...</div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 space-y-6 sm:space-y-8">
@@ -172,6 +164,7 @@ const Index = () => {
           categories={categories}
           products={products}
           onAddCategory={() => setIsAddCategoryOpen(true)}
+          isLoading={categoriesLoading || productsLoading}
         />
       </div>
     </div>
