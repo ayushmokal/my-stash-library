@@ -32,12 +32,26 @@ const ProfileSettings = ({ open, onOpenChange, userEmail }: ProfileSettingsProps
   const [layoutStyle, setLayoutStyle] = useState<"grid" | "list">("grid");
   const [isMounted, setIsMounted] = useState(false);
 
+  // Reset state when dialog closes
+  useEffect(() => {
+    if (!open) {
+      setUsername("");
+      setCurrentUsername("");
+      setThemeColor("#6B4E9B");
+      setBackgroundColor("#FFFFFF");
+      setLayoutStyle("grid");
+      setIsLoading(false);
+    }
+  }, [open]);
+
   useEffect(() => {
     setIsMounted(true);
     return () => setIsMounted(false);
   }, []);
 
   useEffect(() => {
+    let isSubscribed = true;
+
     const fetchProfile = async () => {
       try {
         if (!open || !isMounted) return;
@@ -45,7 +59,7 @@ const ProfileSettings = ({ open, onOpenChange, userEmail }: ProfileSettingsProps
         setIsLoading(true);
         const { data: { user } } = await supabase.auth.getUser();
         
-        if (!user || !isMounted) return;
+        if (!user || !isSubscribed || !isMounted) return;
 
         const { data: profile, error } = await supabase
           .from('profiles')
@@ -55,13 +69,13 @@ const ProfileSettings = ({ open, onOpenChange, userEmail }: ProfileSettingsProps
         
         if (error) {
           console.error('Error fetching profile:', error);
-          if (isMounted) {
+          if (isSubscribed && isMounted) {
             toast.error("Failed to load profile");
           }
           return;
         }
 
-        if (profile && isMounted) {
+        if (profile && isSubscribed && isMounted) {
           setUsername(profile.username || "");
           setCurrentUsername(profile.username || "");
           setThemeColor(profile.theme_color || "#6B4E9B");
@@ -70,17 +84,20 @@ const ProfileSettings = ({ open, onOpenChange, userEmail }: ProfileSettingsProps
         }
       } catch (error) {
         console.error('Error:', error);
-        if (isMounted) {
+        if (isSubscribed && isMounted) {
           toast.error("Failed to load profile");
         }
       } finally {
-        if (isMounted) {
+        if (isSubscribed && isMounted) {
           setIsLoading(false);
         }
       }
     };
 
     fetchProfile();
+    return () => {
+      isSubscribed = false;
+    };
   }, [open, isMounted]);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
@@ -127,7 +144,12 @@ const ProfileSettings = ({ open, onOpenChange, userEmail }: ProfileSettingsProps
       if (isMounted) {
         toast.success("Profile updated successfully!");
         setCurrentUsername(username);
-        onOpenChange(false);
+        // Close dialog after a short delay to ensure state updates are processed
+        setTimeout(() => {
+          if (isMounted) {
+            onOpenChange(false);
+          }
+        }, 100);
       }
     } catch (error: any) {
       if (isMounted) {
