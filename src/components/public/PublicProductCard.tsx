@@ -13,7 +13,7 @@ interface PublicProductCardProps {
 
 const PublicProductCard = ({ product }: PublicProductCardProps) => {
   return (
-    <Card className="group relative flex flex-col overflow-hidden hover:shadow-lg transition-shadow">
+    <Card className="group relative flex flex-col overflow-hidden hover:shadow-lg transition-shadow h-full">
       <div className="relative">
         {product.image_url && (
           <div className="aspect-square w-full overflow-hidden">
@@ -21,12 +21,13 @@ const PublicProductCard = ({ product }: PublicProductCardProps) => {
               src={product.image_url}
               alt={product.name}
               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              loading="lazy"
             />
           </div>
         )}
       </div>
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-xl line-clamp-2">{product.name}</CardTitle>
+      <CardHeader className="space-y-1 flex-grow">
+        <CardTitle className="text-lg md:text-xl line-clamp-2">{product.name}</CardTitle>
         {product.brand && (
           <p className="text-sm text-muted-foreground line-clamp-1">{product.brand}</p>
         )}

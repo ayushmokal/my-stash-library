@@ -29,14 +29,14 @@ const PublicProfileContent = ({ username, categories, products }: PublicProfileC
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container py-8 space-y-8 max-w-7xl mx-auto px-4">
-        <header className="text-center mb-12">
-          <h1 className="text-4xl font-bold tracking-tight">{username}'s stash</h1>
+      <div className="container py-4 md:py-8 space-y-6 md:space-y-8 mx-auto px-4">
+        <header className="text-center mb-8 md:mb-12">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">{username}'s stash</h1>
           <p className="mt-2 text-muted-foreground">Check out my favorite products</p>
           
           <Button 
             onClick={() => navigate("/auth")}
-            className="mt-6"
+            className="mt-4 md:mt-6"
             variant="outline"
           >
             <Plus className="mr-2 h-4 w-4" />
@@ -44,7 +44,7 @@ const PublicProfileContent = ({ username, categories, products }: PublicProfileC
           </Button>
         </header>
 
-        <div className="space-y-16">
+        <div className="space-y-8 md:space-y-16">
           {categories.map((category) => {
             const categoryProducts = products.filter(
               (product) => product.category_id === category.id
@@ -58,9 +58,11 @@ const PublicProfileContent = ({ username, categories, products }: PublicProfileC
                 title={category.name}
                 categoryId={category.id}
               >
-                {categoryProducts.map((product) => (
-                  <PublicProductCard key={product.id} product={product} />
-                ))}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                  {categoryProducts.map((product) => (
+                    <PublicProductCard key={product.id} product={product} />
+                  ))}
+                </div>
               </CategorySection>
             );
           })}
