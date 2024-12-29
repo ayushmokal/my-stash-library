@@ -45,7 +45,11 @@ const StashContent = ({ categories, products, onAddCategory }: StashContentProps
   return (
     <div className="space-y-12">
       {categories.map((category) => (
-        <CategorySection key={category.id} title={category.name}>
+        <CategorySection 
+          key={category.id} 
+          title={category.name}
+          categoryId={category.id}
+        >
           {products
             .filter((product) => product.category_id === category.id)
             .map((product) => (
