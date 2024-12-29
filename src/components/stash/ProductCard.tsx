@@ -132,9 +132,24 @@ const ProductCard = ({ product }: ProductCardProps) => {
           )}
         </div>
         <CardHeader className="space-y-1">
-          <CardTitle className="text-xl">{product.name}</CardTitle>
+          <CardTitle>
+            <span 
+              className="text-[14px] text-black"
+              style={{ lineHeight: '1.2' }}
+            >
+              {product.name}
+            </span>
+          </CardTitle>
           {product.brand && (
-            <p className="text-sm text-muted-foreground">{product.brand}</p>
+            <p 
+              className="text-[12px] text-[#919191]"
+              style={{
+                fontFamily: '"Neue Machina Regular", sans-serif',
+                lineHeight: '1.6em'
+              }}
+            >
+              {product.brand}
+            </p>
           )}
         </CardHeader>
         {product.affiliate_link && (
@@ -156,7 +171,6 @@ const ProductCard = ({ product }: ProductCardProps) => {
         onOpenChange={(open) => {
           setIsEditDialogOpen(open);
           if (!open) {
-            // Cleanup when dialog closes
             queryClient.invalidateQueries({ queryKey: ["products"] });
           }
         }}
