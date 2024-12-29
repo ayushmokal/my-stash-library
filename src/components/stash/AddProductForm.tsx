@@ -9,7 +9,6 @@ import { Form } from "@/components/ui/form";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import ProductFormFields from "./ProductFormFields";
-import ProductPreview from "./ProductPreview";
 
 const formSchema = z.object({
   name: z.string().min(1, "Product name is required"),
@@ -21,7 +20,6 @@ const formSchema = z.object({
 
 const AddProductForm = () => {
   const [isUploading, setIsUploading] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const { data: categories = [] } = useQuery({
@@ -95,7 +93,6 @@ const AddProductForm = () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       toast.success("Product added successfully!");
       form.reset();
-      setPreviewUrl(null);
     } catch (error: any) {
       toast.error(error.message || "Failed to add product");
     } finally {
@@ -103,21 +100,8 @@ const AddProductForm = () => {
     }
   };
 
-  const watchedValues = form.watch();
-
   return (
     <div className="space-y-4 md:space-y-6">
-      {(watchedValues.name || previewUrl) && (
-        <div className="mb-4 md:mb-6">
-          <h3 className="text-sm font-medium mb-2">Preview</h3>
-          <ProductPreview
-            name={watchedValues.name}
-            brand={watchedValues.brand}
-            imageUrl={previewUrl || undefined}
-          />
-        </div>
-      )}
-
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 md:space-y-4">
           <ProductFormFields
