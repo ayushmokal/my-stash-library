@@ -37,20 +37,20 @@ const PublicProfileContent = ({ username, categories, products, userId }: Public
   });
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container py-8 space-y-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <header className="text-center mb-12">
+    <div className="min-h-screen bg-background overflow-x-hidden">
+      <div className="container py-8 space-y-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <header className="text-center">
           <h1 className="text-4xl font-bold tracking-tight lg:text-5xl">{username}'s stash</h1>
-          <p className="mt-2 text-muted-foreground text-lg">Check out my favorite products</p>
+          <p className="mt-4 text-muted-foreground text-lg">Check out my favorite products</p>
           
-          <div className="flex items-center justify-center gap-2 mt-4 text-muted-foreground">
+          <div className="flex items-center justify-center gap-2 mt-6 text-muted-foreground">
             <Eye className="h-4 w-4" />
             <span>{viewCount} views</span>
           </div>
 
           <Button 
             onClick={() => navigate("/auth")}
-            className="mt-6"
+            className="mt-8"
             variant="outline"
             size="lg"
           >
@@ -75,7 +75,7 @@ const PublicProfileContent = ({ username, categories, products, userId }: Public
                 products={categoryProducts}
                 isPublicView={true}
               >
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                   {categoryProducts.map((product) => (
                     <PublicProductCard key={product.id} product={product} />
                   ))}

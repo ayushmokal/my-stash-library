@@ -8,7 +8,7 @@ interface PublicProductCardProps {
 
 const PublicProductCard = ({ product }: PublicProductCardProps) => {
   return (
-    <Card className="group relative flex flex-col overflow-hidden hover:shadow-lg transition-shadow">
+    <Card className="group relative flex flex-col overflow-hidden hover:shadow-lg transition-shadow h-full">
       <div className="relative">
         {product.image_url && (
           <div className="aspect-square w-full overflow-hidden">
@@ -20,7 +20,7 @@ const PublicProductCard = ({ product }: PublicProductCardProps) => {
           </div>
         )}
       </div>
-      <CardHeader className="space-y-1">
+      <CardHeader className="space-y-1 flex-grow">
         <CardTitle className="text-xl line-clamp-2">{product.name}</CardTitle>
         {product.brand && (
           <p className="text-sm text-muted-foreground line-clamp-1">{product.brand}</p>
