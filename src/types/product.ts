@@ -6,6 +6,7 @@ export interface Product {
   affiliate_link: string | null;
   category_id: string;
   user_id: string;
+  position: number;
 }
 
 export interface Category {
