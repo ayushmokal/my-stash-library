@@ -9,6 +9,7 @@ import { Form } from "@/components/ui/form";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import ProductFormFields from "./ProductFormFields";
+import { Progress } from "@/components/ui/progress";
 
 const formSchema = z.object({
   name: z.string().min(1, "Product name is required"),
@@ -21,6 +22,7 @@ const formSchema = z.object({
 
 const AddProductForm = () => {
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const queryClient = useQueryClient();
 
   const { data: categories = [] } = useQuery({
@@ -50,6 +52,7 @@ const AddProductForm = () => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsUploading(true);
+      setUploadProgress(0);
       let imageUrl = values.imageUrl || null;
 
       if (!imageUrl && values.image?.[0]) {
@@ -57,9 +60,23 @@ const AddProductForm = () => {
         const fileExt = file.name.split(".").pop();
         const filePath = `${crypto.randomUUID()}.${fileExt}`;
 
+        // Simulate upload progress
+        const progressInterval = setInterval(() => {
+          setUploadProgress((prev) => {
+            if (prev >= 90) {
+              clearInterval(progressInterval);
+              return 90;
+            }
+            return prev + 10;
+          });
+        }, 100);
+
         const { error: uploadError, data } = await supabase.storage
           .from("product-images")
           .upload(filePath, file);
+
+        clearInterval(progressInterval);
+        setUploadProgress(100);
 
         if (uploadError) {
           throw uploadError;
@@ -95,6 +112,7 @@ const AddProductForm = () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       toast.success("Product added successfully!");
       form.reset();
+      setUploadProgress(0);
     } catch (error: any) {
       toast.error(error.message || "Failed to add product");
     } finally {
@@ -109,7 +127,17 @@ const AddProductForm = () => {
           <ProductFormFields
             form={form}
             categories={categories}
+            disabled={isUploading}
           />
+
+          {uploadProgress > 0 && (
+            <div className="space-y-2">
+              <div className="text-sm text-muted-foreground">
+                Uploading image... {uploadProgress}%
+              </div>
+              <Progress value={uploadProgress} className="h-2" />
+            </div>
+          )}
 
           <Button 
             type="submit" 

@@ -12,11 +12,13 @@ interface Category {
 interface ProductFormFieldsProps {
   form: UseFormReturn<any>;
   categories: Category[];
+  disabled?: boolean;
 }
 
 const ProductFormFields = ({ 
   form, 
-  categories
+  categories,
+  disabled = false
 }: ProductFormFieldsProps) => {
   return (
     <>
@@ -26,7 +28,7 @@ const ProductFormFields = ({
         render={({ field }) => (
           <FormItem>
             <FormLabel>Category</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <Select onValueChange={field.onChange} defaultValue={field.value} disabled={disabled}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a category" />
@@ -52,7 +54,7 @@ const ProductFormFields = ({
           <FormItem>
             <FormLabel>Product Name</FormLabel>
             <FormControl>
-              <Input {...field} />
+              <Input {...field} disabled={disabled} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -66,7 +68,7 @@ const ProductFormFields = ({
           <FormItem>
             <FormLabel>Brand (Optional)</FormLabel>
             <FormControl>
-              <Input {...field} />
+              <Input {...field} disabled={disabled} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -84,6 +86,7 @@ const ProductFormFields = ({
                 {...field}
                 type="url"
                 placeholder="Enter product URL or Amazon affiliate link"
+                disabled={disabled}
               />
             </FormControl>
             <FormMessage />
@@ -102,6 +105,7 @@ const ProductFormFields = ({
                 {...field}
                 type="url"
                 placeholder="Enter image URL"
+                disabled={disabled}
               />
             </FormControl>
             <FormMessage />
@@ -120,6 +124,7 @@ const ProductFormFields = ({
                 type="file"
                 accept="image/*"
                 onChange={(e) => onChange(e.target.files)}
+                disabled={disabled}
                 {...field}
               />
             </FormControl>
