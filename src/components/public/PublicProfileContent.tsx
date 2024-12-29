@@ -1,3 +1,6 @@
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 import CategorySection from "@/components/stash/CategorySection";
 import PublicProductCard from "./PublicProductCard";
 
@@ -22,12 +25,23 @@ interface PublicProfileContentProps {
 }
 
 const PublicProfileContent = ({ username, categories, products }: PublicProfileContentProps) => {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container py-8 space-y-8 max-w-7xl mx-auto px-4">
         <header className="text-center mb-12">
           <h1 className="text-4xl font-bold tracking-tight">{username}'s stash</h1>
           <p className="mt-2 text-muted-foreground">Check out my favorite products</p>
+          
+          <Button 
+            onClick={() => navigate("/auth")}
+            className="mt-6"
+            variant="outline"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Create your own stash
+          </Button>
         </header>
 
         <div className="space-y-16">
