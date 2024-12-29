@@ -38,28 +38,28 @@ const PublicProfileContent = ({ username, categories, products, userId }: Public
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <header className="text-center mb-12">
-          <h1 className="text-4xl font-bold tracking-tight lg:text-5xl">{username}'s stash</h1>
-          <p className="mt-2 text-muted-foreground text-lg">Check out my favorite products</p>
+      <div className="container py-12 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+        <header className="text-center mb-16">
+          <h1 className="text-5xl font-bold tracking-tight lg:text-6xl mb-6">{username}'s stash</h1>
+          <p className="mt-4 text-muted-foreground text-xl">Check out my favorite products</p>
           
-          <div className="flex items-center justify-center gap-2 mt-4 text-muted-foreground">
-            <Eye className="h-4 w-4" />
+          <div className="flex items-center justify-center gap-3 mt-6 text-muted-foreground text-lg">
+            <Eye className="h-5 w-5" />
             <span>{viewCount} views</span>
           </div>
 
           <Button 
             onClick={() => navigate("/auth")}
-            className="mt-6"
+            className="mt-8"
             variant="outline"
             size="lg"
           >
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="mr-2 h-5 w-5" />
             Create Your Own Stash
           </Button>
         </header>
 
-        <div className="space-y-8">
+        <div className="space-y-16">
           {categories.map((category) => {
             const categoryProducts = products.filter(
               (product) => product.category_id === category.id
@@ -75,7 +75,7 @@ const PublicProfileContent = ({ username, categories, products, userId }: Public
                 products={categoryProducts}
                 isPublicView={true}
               >
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                   {categoryProducts.map((product) => (
                     <PublicProductCard key={product.id} product={product} />
                   ))}

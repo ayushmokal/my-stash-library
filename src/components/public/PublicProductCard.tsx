@@ -20,10 +20,10 @@ const PublicProductCard = ({ product }: PublicProductCardProps) => {
           </div>
         )}
       </div>
-      <CardHeader className="flex-grow space-y-1">
-        <CardTitle className="text-xl line-clamp-2">{product.name}</CardTitle>
+      <CardHeader className="flex-grow space-y-2">
+        <CardTitle className="text-2xl line-clamp-2">{product.name}</CardTitle>
         {product.brand && (
-          <p className="text-sm text-muted-foreground line-clamp-1">{product.brand}</p>
+          <p className="text-lg text-muted-foreground line-clamp-1">{product.brand}</p>
         )}
       </CardHeader>
       {product.affiliate_link && (
@@ -32,9 +32,9 @@ const PublicProductCard = ({ product }: PublicProductCardProps) => {
             href={product.affiliate_link}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800"
+            className="inline-flex items-center text-lg text-blue-600 hover:text-blue-800"
           >
-            Buy now <ExternalLink className="ml-1 h-4 w-4" />
+            Buy now <ExternalLink className="ml-2 h-5 w-5" />
           </a>
         </CardContent>
       )}
