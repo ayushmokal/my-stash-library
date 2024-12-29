@@ -58,7 +58,7 @@ const Landing = () => {
 
         <div className="space-y-4">
           <div className="flex items-center space-x-2">
-            <span className="text-muted-foreground whitespace-nowrap">mystash.me/</span>
+            <span className="text-muted-foreground whitespace-nowrap">mystash.tech/</span>
             <Input
               type="text"
               placeholder="your-name"
