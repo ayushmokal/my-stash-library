@@ -148,9 +148,9 @@ const AddProductForm = () => {
   const watchedValues = form.watch();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {(watchedValues.name || previewUrl) && (
-        <div className="mb-6">
+        <div className="mb-4 md:mb-6">
           <h3 className="text-sm font-medium mb-2">Preview</h3>
           <ProductPreview
             name={watchedValues.name}
@@ -161,7 +161,7 @@ const AddProductForm = () => {
       )}
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 md:space-y-4">
           <ProductFormFields
             form={form}
             categories={categories}
@@ -169,7 +169,11 @@ const AddProductForm = () => {
             onAffiliateLinkChange={handleAffiliateLinkChange}
           />
 
-          <Button type="submit" className="w-full" disabled={isUploading || isFetchingAmazon}>
+          <Button 
+            type="submit" 
+            className="w-full mt-4" 
+            disabled={isUploading || isFetchingAmazon}
+          >
             {isUploading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
