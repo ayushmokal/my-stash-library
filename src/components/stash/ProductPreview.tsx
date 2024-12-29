@@ -9,7 +9,7 @@ interface ProductPreviewProps {
 }
 
 const ProductPreview = ({ name, brand, imageUrl, affiliateLink }: ProductPreviewProps) => {
-  if (!name) return null;
+  if (!name || !imageUrl) return null;
 
   return (
     <Card className="overflow-hidden">

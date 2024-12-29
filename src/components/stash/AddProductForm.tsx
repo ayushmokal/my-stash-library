@@ -107,13 +107,13 @@ const AddProductForm = () => {
 
   return (
     <div className="space-y-4 md:space-y-6">
-      {(watchedValues.name || previewUrl) && (
+      {previewUrl && (
         <div className="mb-4 md:mb-6">
           <h3 className="text-sm font-medium mb-2">Preview</h3>
           <ProductPreview
             name={watchedValues.name}
             brand={watchedValues.brand}
-            imageUrl={previewUrl || undefined}
+            imageUrl={previewUrl}
           />
         </div>
       )}
