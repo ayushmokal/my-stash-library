@@ -1,3 +1,4 @@
+import { Skeleton } from "@/components/ui/skeleton";
 import ProductSkeleton from "./ProductSkeleton";
 
 const CategorySkeleton = () => {
