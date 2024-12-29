@@ -23,7 +23,7 @@ const AddStuffCard = () => {
           </div>
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-[425px] p-4 md:p-6">
+      <DialogContent className="w-[95vw] max-w-[425px] p-4 md:p-6 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add New Product</DialogTitle>
         </DialogHeader>
