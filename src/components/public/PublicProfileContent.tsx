@@ -72,6 +72,7 @@ const PublicProfileContent = ({ username, categories, products, userId }: Public
                 title={category.name}
                 categoryId={category.id}
                 products={categoryProducts}
+                isPublicView={true}
               >
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                   {categoryProducts.map((product) => (

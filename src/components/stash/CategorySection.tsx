@@ -36,9 +36,10 @@ interface CategorySectionProps {
   categoryId: string;
   children: ReactNode;
   products: Array<{ id: string; position: number; category_id: string; name: string; user_id: string }>;
+  isPublicView?: boolean;
 }
 
-export const CategorySection = ({ title, categoryId, children, products }: CategorySectionProps) => {
+export const CategorySection = ({ title, categoryId, children, products, isPublicView = false }: CategorySectionProps) => {
   const queryClient = useQueryClient();
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -109,28 +110,30 @@ export const CategorySection = ({ title, categoryId, children, products }: Categ
     <section className="w-full space-y-4 animate-fade-in">
       <div className="flex items-center justify-between px-3 sm:px-4 py-2 bg-stash-gray rounded-lg">
         <h2 className="text-xl sm:text-2xl font-semibold">{title}</h2>
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600 hover:bg-red-100">
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent className="w-[95vw] max-w-[425px] p-4 sm:p-6">
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete Category</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to delete this category? This will also remove all products in this category.
-                This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDelete} className="bg-red-500 hover:bg-red-600">
-                Delete
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        {!isPublicView && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600 hover:bg-red-100">
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className="w-[95vw] max-w-[425px] p-4 sm:p-6">
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Category</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete this category? This will also remove all products in this category.
+                  This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDelete} className="bg-red-500 hover:bg-red-600">
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
       </div>
       <DndContext
         sensors={sensors}
