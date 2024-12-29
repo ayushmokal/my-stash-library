@@ -13,6 +13,7 @@ const AuthForm = ({ initialUsername = "" }: AuthFormProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(!!initialUsername);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -20,7 +21,7 @@ const AuthForm = ({ initialUsername = "" }: AuthFormProps) => {
     setIsLoading(true);
 
     try {
-      if (initialUsername) {
+      if (isSignUp) {
         // Sign up flow
         const { data: existingProfile } = await supabase
           .from('profiles')
@@ -50,7 +51,7 @@ const AuthForm = ({ initialUsername = "" }: AuthFormProps) => {
               duration: 5000,
               action: {
                 label: "Sign In",
-                onClick: () => navigate("/auth"),
+                onClick: () => setIsSignUp(false),
               },
             });
             setIsLoading(false);
@@ -110,10 +111,36 @@ const AuthForm = ({ initialUsername = "" }: AuthFormProps) => {
         {initialUsername ? (
           <>
             <h2 className="text-2xl font-semibold">Now, create your account</h2>
-            <p className="text-muted-foreground">{window.location.origin}/{initialUsername} is yours!</p>
+            <p className="text-muted-foreground">mystash.tech/{initialUsername} is yours!</p>
           </>
         ) : (
-          <h2 className="text-2xl font-semibold">Sign in to your account</h2>
+          <>
+            <h2 className="text-2xl font-semibold">
+              {isSignUp ? "Create your account" : "Sign in to your account"}
+            </h2>
+            {!isSignUp && (
+              <p className="text-sm text-muted-foreground">
+                Don't have an account?{" "}
+                <button
+                  onClick={() => setIsSignUp(true)}
+                  className="text-primary hover:underline font-medium"
+                >
+                  Create one
+                </button>
+              </p>
+            )}
+            {isSignUp && (
+              <p className="text-sm text-muted-foreground">
+                Already have an account?{" "}
+                <button
+                  onClick={() => setIsSignUp(false)}
+                  className="text-primary hover:underline font-medium"
+                >
+                  Sign in
+                </button>
+              </p>
+            )}
+          </>
         )}
       </div>
       
@@ -141,7 +168,7 @@ const AuthForm = ({ initialUsername = "" }: AuthFormProps) => {
           className="w-full bg-black hover:bg-gray-800 text-white"
           disabled={isLoading}
         >
-          {initialUsername ? "Create Account" : "Sign In"}
+          {isSignUp ? "Create Account" : "Sign In"}
         </Button>
       </form>
     </div>
