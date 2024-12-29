@@ -35,7 +35,7 @@ interface CategorySectionProps {
   title: string;
   categoryId: string;
   children: ReactNode;
-  products: Array<{ id: string; position: number }>;
+  products: Array<{ id: string; position: number; category_id: string; name: string; user_id: string }>;
 }
 
 export const CategorySection = ({ title, categoryId, children, products }: CategorySectionProps) => {
@@ -85,6 +85,9 @@ export const CategorySection = ({ title, categoryId, children, products }: Categ
       const updates = newOrder.map((item, index) => ({
         id: item.id,
         position: index + 1,
+        category_id: item.category_id,
+        name: item.name,
+        user_id: item.user_id
       }));
 
       const { error } = await supabase

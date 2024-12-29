@@ -96,6 +96,16 @@ const AddProductForm = () => {
         throw new Error("User not authenticated");
       }
 
+      // Get the highest position for this category
+      const { data: maxPositionData } = await supabase
+        .from('products')
+        .select('position')
+        .eq('category_id', values.categoryId)
+        .order('position', { ascending: false })
+        .limit(1);
+
+      const nextPosition = (maxPositionData?.[0]?.position || 0) + 1;
+
       const { error: insertError } = await supabase.from("products").insert({
         name: values.name,
         brand: values.brand || null,
@@ -103,6 +113,7 @@ const AddProductForm = () => {
         image_url: imageUrl,
         user_id: user.id,
         category_id: values.categoryId,
+        position: nextPosition,
       });
 
       if (insertError) {

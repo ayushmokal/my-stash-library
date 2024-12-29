@@ -71,6 +71,7 @@ const PublicProfileContent = ({ username, categories, products, userId }: Public
                 key={category.id}
                 title={category.name}
                 categoryId={category.id}
+                products={categoryProducts}
               >
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                   {categoryProducts.map((product) => (
