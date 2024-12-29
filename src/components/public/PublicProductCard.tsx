@@ -15,12 +15,12 @@ const PublicProductCard = ({ product }: PublicProductCardProps) => {
             <img
               src={product.image_url}
               alt={product.name}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
           </div>
         )}
       </div>
-      <CardHeader className="space-y-1 flex-grow">
+      <CardHeader className="flex-grow space-y-1">
         <CardTitle className="text-xl line-clamp-2">{product.name}</CardTitle>
         {product.brand && (
           <p className="text-sm text-muted-foreground line-clamp-1">{product.brand}</p>
