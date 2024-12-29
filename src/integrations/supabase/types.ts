@@ -106,20 +106,29 @@ export type Database = {
       }
       profiles: {
         Row: {
+          background_color: string | null
           created_at: string
           id: string
+          layout_style: string | null
+          theme_color: string | null
           updated_at: string
           username: string | null
         }
         Insert: {
+          background_color?: string | null
           created_at?: string
           id: string
+          layout_style?: string | null
+          theme_color?: string | null
           updated_at?: string
           username?: string | null
         }
         Update: {
+          background_color?: string | null
           created_at?: string
           id?: string
+          layout_style?: string | null
+          theme_color?: string | null
           updated_at?: string
           username?: string | null
         }
