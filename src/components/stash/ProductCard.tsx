@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ExternalLink, MoreVertical } from "lucide-react";
+import { ExternalLink, MoreVertical, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -20,6 +20,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 interface ProductCardProps {
   product: {
@@ -29,6 +31,7 @@ interface ProductCardProps {
     image_url: string | null;
     affiliate_link: string | null;
     category_id: string;
+    position: number;
   };
 }
 
@@ -37,19 +40,32 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const [user, setUser] = useState<User | null>(null);
   const queryClient = useQueryClient();
 
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: product.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
 
-    // Initial auth state
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
     });
 
     return () => {
       subscription.unsubscribe();
-      // Cleanup any pending queries
       queryClient.cancelQueries({ queryKey: ["products"] });
     };
   }, [queryClient]);
@@ -84,41 +100,56 @@ const ProductCard = ({ product }: ProductCardProps) => {
   };
 
   return (
-    <>
+    <div ref={setNodeRef} style={style}>
       <Card className="group relative flex flex-col overflow-hidden hover:shadow-lg transition-shadow">
         {user && (
-          <div className="absolute top-2 right-2 z-50">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="bg-white/80 backdrop-blur-sm hover:bg-white"
+          <>
+            <div className="absolute top-2 right-2 z-50">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="bg-white/80 backdrop-blur-sm hover:bg-white"
+                  >
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent 
+                  align="end" 
+                  className="w-[200px]"
+                  sideOffset={5}
                 >
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent 
-                align="end" 
-                className="w-[200px]"
-                sideOffset={5}
+                  <DropdownMenuItem 
+                    onClick={() => setIsEditDialogOpen(true)}
+                    className="cursor-pointer"
+                  >
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem 
+                    onClick={handleDelete}
+                    className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
+                  >
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            <div 
+              className="absolute top-2 left-2 z-50 cursor-move touch-none"
+              {...attributes}
+              {...listeners}
+            >
+              <Button
+                variant="ghost"
+                size="icon"
+                className="bg-white/80 backdrop-blur-sm hover:bg-white"
               >
-                <DropdownMenuItem 
-                  onClick={() => setIsEditDialogOpen(true)}
-                  className="cursor-pointer"
-                >
-                  Edit
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  onClick={handleDelete}
-                  className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
-                >
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+                <GripVertical className="h-4 w-4" />
+              </Button>
+            </div>
+          </>
         )}
         <div className="relative">
           {product.image_url && (
@@ -156,7 +187,6 @@ const ProductCard = ({ product }: ProductCardProps) => {
         onOpenChange={(open) => {
           setIsEditDialogOpen(open);
           if (!open) {
-            // Cleanup when dialog closes
             queryClient.invalidateQueries({ queryKey: ["products"] });
           }
         }}
@@ -171,7 +201,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           />
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 };
 

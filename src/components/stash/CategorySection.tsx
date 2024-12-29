@@ -15,15 +15,37 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+} from "@dnd-kit/sortable";
 
 interface CategorySectionProps {
   title: string;
   categoryId: string;
   children: ReactNode;
+  products: Array<{ id: string; position: number }>;
 }
 
-export const CategorySection = ({ title, categoryId, children }: CategorySectionProps) => {
+export const CategorySection = ({ title, categoryId, children, products }: CategorySectionProps) => {
   const queryClient = useQueryClient();
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const handleDelete = async () => {
     try {
@@ -40,6 +62,43 @@ export const CategorySection = ({ title, categoryId, children }: CategorySection
     } catch (error: any) {
       console.error("Error deleting category:", error);
       toast.error(error.message || "Failed to delete category");
+    }
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (!over || active.id === over.id) {
+      return;
+    }
+
+    const oldIndex = products.findIndex((item) => item.id === active.id);
+    const newIndex = products.findIndex((item) => item.id === over.id);
+    
+    if (oldIndex === -1 || newIndex === -1) {
+      return;
+    }
+
+    const newOrder = arrayMove(products, oldIndex, newIndex);
+    
+    try {
+      const updates = newOrder.map((item, index) => ({
+        id: item.id,
+        position: index + 1,
+      }));
+
+      const { error } = await supabase
+        .from('products')
+        .upsert(updates, { onConflict: 'id' });
+
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      toast.success("Product order updated");
+    } catch (error: any) {
+      console.error("Error updating positions:", error);
+      toast.error("Failed to update product order");
+      queryClient.invalidateQueries({ queryKey: ["products"] });
     }
   };
 
@@ -70,9 +129,17 @@ export const CategorySection = ({ title, categoryId, children }: CategorySection
           </AlertDialogContent>
         </AlertDialog>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-        {children}
-      </div>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext items={products} strategy={rectSortingStrategy}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {children}
+          </div>
+        </SortableContext>
+      </DndContext>
     </section>
   );
 };

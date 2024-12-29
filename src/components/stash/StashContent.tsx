@@ -19,6 +19,7 @@ interface Product {
   affiliate_link: string | null;
   category_id: string;
   user_id: string;
+  position: number;
 }
 
 interface StashContentProps {
@@ -56,20 +57,25 @@ const StashContent = ({ categories, products, onAddCategory, isLoading }: StashC
 
   return (
     <div className="space-y-8 sm:space-y-12">
-      {categories.map((category) => (
-        <CategorySection 
-          key={category.id} 
-          title={category.name}
-          categoryId={category.id}
-        >
-          {products
-            .filter((product) => product.category_id === category.id)
-            .map((product) => (
+      {categories.map((category) => {
+        const categoryProducts = products
+          .filter((product) => product.category_id === category.id)
+          .sort((a, b) => (a.position || 0) - (b.position || 0));
+
+        return (
+          <CategorySection 
+            key={category.id} 
+            title={category.name}
+            categoryId={category.id}
+            products={categoryProducts}
+          >
+            {categoryProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
-          <AddStuffCard />
-        </CategorySection>
-      ))}
+            <AddStuffCard />
+          </CategorySection>
+        );
+      })}
     </div>
   );
 };
