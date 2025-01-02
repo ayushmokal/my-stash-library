@@ -7,7 +7,6 @@ import { Product, Category } from "@/types/product";
 
 const PublicProfile = () => {
   const { username } = useParams();
-  const [userId, setUserId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewCount, setViewCount] = useState(0);
@@ -23,7 +22,7 @@ const PublicProfile = () => {
           return;
         }
 
-        // Always set the username parameter first
+        // First, set the username parameter for RLS policies
         const { error: paramError } = await supabase.rpc('set_request_parameter', {
           name: 'username',
           value: username
@@ -51,8 +50,6 @@ const PublicProfile = () => {
           return;
         }
 
-        setUserId(profileData.id);
-
         // Increment view count
         const { error: incrementError } = await supabase.rpc('increment_profile_views', {
           profile_id_param: profileData.id
@@ -74,7 +71,7 @@ const PublicProfile = () => {
         }
 
       } catch (err: any) {
-        console.error("Error fetching profile:", err);
+        console.error("Error initializing profile:", err);
         setError(err.message);
       } finally {
         setIsLoading(false);
@@ -89,7 +86,7 @@ const PublicProfile = () => {
     queryFn: async () => {
       if (!username) throw new Error("Username is required");
 
-      // Set username parameter before query
+      // Set username parameter before querying
       await supabase.rpc('set_request_parameter', {
         name: 'username',
         value: username
@@ -115,7 +112,7 @@ const PublicProfile = () => {
     queryFn: async () => {
       if (!username) throw new Error("Username is required");
 
-      // Set username parameter before query
+      // Set username parameter before querying
       await supabase.rpc('set_request_parameter', {
         name: 'username',
         value: username
