@@ -55,24 +55,7 @@ const PublicProfileContent = ({
     enabled: !!username,
   });
 
-  // Fetch user ID for the given username
-  const { data: userData } = useQuery({
-    queryKey: ["public-user", username],
-    queryFn: async () => {
-      if (!username) throw new Error("Username is required");
-
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("username", username)
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!username,
-  });
-
+  // Fetch categories
   const { data: categories = [], isLoading: isCategoriesLoading } = useQuery({
     queryKey: ["public-categories", username],
     queryFn: async () => {
@@ -89,46 +72,50 @@ const PublicProfileContent = ({
     enabled: !!username && isParamSet,
   });
 
+  // Fetch products with public URLs
   const { data: products = [], isLoading: isProductsLoading } = useQuery({
-    queryKey: ["public-products", username],
+    queryKey: ["public-products", username, profileData?.id],
     queryFn: async () => {
-      if (!username || !userData?.id) throw new Error("Username and user ID are required");
+      if (!username || !profileData?.id) throw new Error("Username and profile ID are required");
 
-      // Fetch products from public-profiles storage
-      const { data: storageData, error: storageError } = await supabase.storage
-        .from("public-profiles")
-        .list(userData.id);
-
-      if (storageError) {
-        console.error("Error fetching from storage:", storageError);
-      }
-
-      // Fetch products from database
-      const { data, error } = await supabase
+      // First, fetch all products from the database
+      const { data: productsData, error: productsError } = await supabase
         .from("products")
         .select("*")
         .order('created_at', { ascending: true });
 
-      if (error) throw error;
+      if (productsError) throw productsError;
 
-      // Merge storage data with database data
-      const productsWithPublicUrls = data.map(product => {
+      // Then, fetch the list of files from public-profiles storage
+      const { data: storageFiles, error: storageError } = await supabase.storage
+        .from("public-profiles")
+        .list(profileData.id);
+
+      if (storageError) {
+        console.error("Error fetching storage files:", storageError);
+        return productsData;
+      }
+
+      // Map products to include public URLs for images
+      const productsWithPublicUrls = productsData.map(product => {
         if (product.image_url) {
           const fileName = product.image_url.split('/').pop();
-          const storageFile = storageData?.find(file => file.name === fileName);
-          if (storageFile) {
+          const matchingFile = storageFiles.find(file => file.name === fileName);
+          
+          if (matchingFile) {
             const { data: { publicUrl } } = supabase.storage
               .from("public-profiles")
-              .getPublicUrl(`${userData.id}/${fileName}`);
+              .getPublicUrl(`${profileData.id}/${fileName}`);
+            
             return { ...product, image_url: publicUrl };
           }
         }
         return product;
       });
 
-      return productsWithPublicUrls || [];
+      return productsWithPublicUrls;
     },
-    enabled: !!username && isParamSet && !!userData?.id,
+    enabled: !!username && isParamSet && !!profileData?.id,
   });
 
   if (!username) {
@@ -143,7 +130,6 @@ const PublicProfileContent = ({
     );
   }
 
-  // Apply theme customization from profile data
   const containerStyle = {
     backgroundColor: profileData?.background_color || '#FFFFFF',
     minHeight: '100vh',
