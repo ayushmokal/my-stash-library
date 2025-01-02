@@ -17,14 +17,13 @@ const PublicProfile = () => {
       try {
         setIsLoading(true);
         setError(null);
-        console.log('Fetching profile for username:', username);
         
         if (!username) {
           setError("Username is required");
           return;
         }
 
-        // Set the username parameter
+        // Always set the username parameter first
         const { error: paramError } = await supabase.rpc('set_request_parameter', {
           name: 'username',
           value: username
@@ -35,6 +34,7 @@ const PublicProfile = () => {
           throw paramError;
         }
 
+        // Fetch the profile data
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
           .select("id")
@@ -45,14 +45,12 @@ const PublicProfile = () => {
           console.error('Error fetching profile:', profileError);
           throw profileError;
         }
-        
+
         if (!profileData) {
-          console.log('No profile found for username:', username);
           setError(`Profile "${username}" not found`);
           return;
         }
 
-        console.log('Found profile:', profileData);
         setUserId(profileData.id);
 
         // Increment view count
@@ -87,11 +85,11 @@ const PublicProfile = () => {
   }, [username]);
 
   const { data: categories = [] } = useQuery<Category[]>({
-    queryKey: ["public-categories", userId, username],
+    queryKey: ["public-categories", username],
     queryFn: async () => {
-      if (!userId || !username) throw new Error("Profile not initialized");
+      if (!username) throw new Error("Username is required");
 
-      // Set the parameter before querying
+      // Set username parameter before query
       await supabase.rpc('set_request_parameter', {
         name: 'username',
         value: username
@@ -100,7 +98,6 @@ const PublicProfile = () => {
       const { data, error } = await supabase
         .from("categories")
         .select("*")
-        .eq("user_id", userId)
         .order('created_at', { ascending: true });
 
       if (error) {
@@ -110,15 +107,15 @@ const PublicProfile = () => {
 
       return data;
     },
-    enabled: !!userId && !!username,
+    enabled: !!username,
   });
 
   const { data: products = [] } = useQuery<Product[]>({
-    queryKey: ["public-products", userId, username],
+    queryKey: ["public-products", username],
     queryFn: async () => {
-      if (!userId || !username) throw new Error("Profile not initialized");
+      if (!username) throw new Error("Username is required");
 
-      // Set the parameter before querying
+      // Set username parameter before query
       await supabase.rpc('set_request_parameter', {
         name: 'username',
         value: username
@@ -127,7 +124,6 @@ const PublicProfile = () => {
       const { data, error } = await supabase
         .from("products")
         .select("*")
-        .eq("user_id", userId)
         .order('created_at', { ascending: true });
 
       if (error) {
@@ -137,7 +133,7 @@ const PublicProfile = () => {
 
       return data;
     },
-    enabled: !!userId && !!username,
+    enabled: !!username,
   });
 
   if (isLoading) {
@@ -152,14 +148,6 @@ const PublicProfile = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-xl text-red-500">{error}</p>
-      </div>
-    );
-  }
-
-  if (!userId || !username) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-xl">Profile not found</p>
       </div>
     );
   }
