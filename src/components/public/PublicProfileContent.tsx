@@ -30,10 +30,16 @@ const PublicProfileContent = ({
     setUsernameParam();
   }, [username]);
 
-  const { data: categories = [] } = useQuery({
+  const { data: categories = [], isLoading: isCategoriesLoading } = useQuery({
     queryKey: ["public-categories", username],
     queryFn: async () => {
       if (!username) throw new Error("Username is required");
+
+      // Set username parameter again before the query
+      await supabase.rpc('set_request_parameter', {
+        name: 'username',
+        value: username
+      });
 
       const { data, error } = await supabase
         .from("categories")
@@ -50,10 +56,16 @@ const PublicProfileContent = ({
     enabled: !!username,
   });
 
-  const { data: products = [] } = useQuery({
+  const { data: products = [], isLoading: isProductsLoading } = useQuery({
     queryKey: ["public-products", username],
     queryFn: async () => {
       if (!username) throw new Error("Username is required");
+
+      // Set username parameter again before the query
+      await supabase.rpc('set_request_parameter', {
+        name: 'username',
+        value: username
+      });
 
       const { data, error } = await supabase
         .from("products")
@@ -72,6 +84,14 @@ const PublicProfileContent = ({
 
   if (!username) {
     return null;
+  }
+
+  if (isCategoriesLoading || isProductsLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-xl">Loading profile...</p>
+      </div>
+    );
   }
 
   return (
