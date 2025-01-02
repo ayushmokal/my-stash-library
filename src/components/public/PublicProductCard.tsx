@@ -28,7 +28,9 @@ const PublicProductCard = ({ product, accentColor }: PublicProductCardProps) => 
       <CardHeader className="space-y-1">
         <CardTitle className="text-xl line-clamp-2">{product.name}</CardTitle>
         {product.brand && (
-          <p className="text-sm text-muted-foreground line-clamp-1">{product.brand}</p>
+          <p className="text-sm text-muted-foreground line-clamp-1">
+            {product.brand}
+          </p>
         )}
       </CardHeader>
       {product.affiliate_link && (
