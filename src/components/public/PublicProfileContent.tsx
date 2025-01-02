@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Eye, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PublicProductCard from "./PublicProductCard";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 
@@ -16,15 +16,22 @@ const PublicProfileContent = ({
   viewCount,
 }: PublicProfileContentProps) => {
   const navigate = useNavigate();
+  const [isParamSet, setIsParamSet] = useState(false);
 
   // Set the username parameter for RLS policies
   useEffect(() => {
     const setUsernameParam = async () => {
       if (username) {
-        await supabase.rpc('set_request_parameter', {
-          name: 'username',
-          value: username
-        });
+        try {
+          await supabase.rpc('set_request_parameter', {
+            name: 'username',
+            value: username
+          });
+          setIsParamSet(true);
+        } catch (error) {
+          console.error("Error setting username parameter:", error);
+          setIsParamSet(false);
+        }
       }
     };
     setUsernameParam();
@@ -34,12 +41,6 @@ const PublicProfileContent = ({
     queryKey: ["public-categories", username],
     queryFn: async () => {
       if (!username) throw new Error("Username is required");
-
-      // Set username parameter again before the query
-      await supabase.rpc('set_request_parameter', {
-        name: 'username',
-        value: username
-      });
 
       const { data, error } = await supabase
         .from("categories")
@@ -53,20 +54,13 @@ const PublicProfileContent = ({
 
       return data || [];
     },
-    enabled: !!username,
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    enabled: !!username && isParamSet,
   });
 
   const { data: products = [], isLoading: isProductsLoading } = useQuery({
     queryKey: ["public-products", username],
     queryFn: async () => {
       if (!username) throw new Error("Username is required");
-
-      // Set username parameter again before the query
-      await supabase.rpc('set_request_parameter', {
-        name: 'username',
-        value: username
-      });
 
       const { data, error } = await supabase
         .from("products")
@@ -80,8 +74,7 @@ const PublicProfileContent = ({
 
       return data || [];
     },
-    enabled: !!username,
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    enabled: !!username && isParamSet,
   });
 
   if (!username) {
