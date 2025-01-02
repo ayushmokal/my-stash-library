@@ -2,23 +2,70 @@ import { useNavigate } from "react-router-dom";
 import { Eye, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PublicProductCard from "./PublicProductCard";
-import CategorySection from "../stash/CategorySection";
+import { useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 interface PublicProfileContentProps {
   username: string | null;
-  categories: any[];
-  products: any[];
   viewCount: number;
-  userId?: string; // Added userId as optional prop
 }
 
 const PublicProfileContent = ({
   username,
-  categories,
-  products,
   viewCount,
 }: PublicProfileContentProps) => {
   const navigate = useNavigate();
+
+  // Set the username parameter for RLS policies
+  useEffect(() => {
+    if (username) {
+      supabase.rpc('set_request_parameter', {
+        name: 'username',
+        value: username
+      });
+    }
+  }, [username]);
+
+  const { data: categories = [] } = useQuery({
+    queryKey: ["public-categories", username],
+    queryFn: async () => {
+      if (!username) throw new Error("Username is required");
+
+      const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error("Error fetching categories:", error);
+        throw error;
+      }
+
+      return data;
+    },
+    enabled: !!username,
+  });
+
+  const { data: products = [] } = useQuery({
+    queryKey: ["public-products", username],
+    queryFn: async () => {
+      if (!username) throw new Error("Username is required");
+
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error("Error fetching products:", error);
+        throw error;
+      }
+
+      return data;
+    },
+    enabled: !!username,
+  });
 
   if (!username) {
     return null;
