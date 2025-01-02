@@ -1,5 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ExternalLink, GripVertical } from "lucide-react";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,6 +16,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import ProductMenu from "./ProductMenu";
+import ProductImage from "./ProductImage";
+import ProductActions from "./ProductActions";
+import { copyToPublicStorage, deleteFromStorage } from "@/utils/storage";
 
 interface ProductCardProps {
   product: {
@@ -64,44 +67,11 @@ const ProductCard = ({ product }: ProductCardProps) => {
     };
   }, [queryClient]);
 
-  const copyToPublicStorage = async () => {
-    if (!product.image_url || !user) return;
-
-    try {
-      // Get the original file name from the product image URL
-      const fileName = product.image_url.split('/').pop();
-      if (!fileName) return;
-
-      // Download the file from product-images bucket
-      const { data: fileData, error: downloadError } = await supabase.storage
-        .from('product-images')
-        .download(fileName);
-
-      if (downloadError) {
-        console.error('Error downloading file:', downloadError);
-        return;
-      }
-
-      // Upload to public-profiles bucket under user's folder
-      const { error: uploadError } = await supabase.storage
-        .from('public-profiles')
-        .upload(`${user.id}/${fileName}`, fileData, {
-          upsert: true
-        });
-
-      if (uploadError) {
-        console.error('Error uploading to public storage:', uploadError);
-      }
-    } catch (error) {
-      console.error('Error copying to public storage:', error);
-    }
-  };
-
   useEffect(() => {
-    if (product.image_url) {
-      copyToPublicStorage();
+    if (product.image_url && user) {
+      copyToPublicStorage(product.image_url, user.id);
     }
-  }, [product.image_url]);
+  }, [product.image_url, user]);
 
   const handleDelete = async () => {
     try {
@@ -112,21 +82,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
       if (error) throw error;
 
-      if (product.image_url) {
+      if (product.image_url && user) {
         const imagePath = product.image_url.split("/").pop();
         if (imagePath) {
-          // Delete from both storage buckets
-          const { error: storageError } = await supabase.storage
-            .from("product-images")
-            .remove([imagePath]);
-
-          const { error: publicStorageError } = await supabase.storage
-            .from("public-profiles")
-            .remove([`${user?.id}/${imagePath}`]);
-
-          if (storageError || publicStorageError) {
-            console.error("Error deleting images:", { storageError, publicStorageError });
-          }
+          await deleteFromStorage(imagePath, user.id);
         }
       }
 
@@ -163,35 +122,17 @@ const ProductCard = ({ product }: ProductCardProps) => {
             </div>
           </>
         )}
-        <div className="relative">
-          {product.image_url && (
-            <div className="aspect-square w-full overflow-hidden">
-              <img
-                src={product.image_url}
-                alt={product.name}
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-              />
-            </div>
-          )}
-        </div>
+        
+        <ProductImage imageUrl={product.image_url} name={product.name} />
+        
         <CardHeader className="space-y-1">
           <CardTitle className="text-xl line-clamp-2">{product.name}</CardTitle>
           {product.brand && (
             <p className="text-sm text-muted-foreground line-clamp-1">{product.brand}</p>
           )}
         </CardHeader>
-        {product.affiliate_link && (
-          <CardContent>
-            <a
-              href={product.affiliate_link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800"
-            >
-              Buy now <ExternalLink className="ml-1 h-4 w-4" />
-            </a>
-          </CardContent>
-        )}
+
+        <ProductActions affiliateLink={product.affiliate_link} />
       </Card>
 
       <Dialog 
@@ -211,7 +152,9 @@ const ProductCard = ({ product }: ProductCardProps) => {
             product={product}
             onSuccess={() => {
               setIsEditDialogOpen(false);
-              copyToPublicStorage(); // Copy to public storage after edit
+              if (product.image_url && user) {
+                copyToPublicStorage(product.image_url, user.id);
+              }
             }}
           />
         </DialogContent>

@@ -39,6 +39,7 @@ const PublicProfileContent = ({
     queryKey: ["public-profile", username],
     queryFn: async () => {
       if (!username) throw new Error("Username is required");
+      console.log('Fetching profile data for username:', username);
 
       const { data, error } = await supabase
         .from("profiles")
@@ -47,6 +48,7 @@ const PublicProfileContent = ({
         .single();
 
       if (error) throw error;
+      console.log('Profile data:', data);
       return data;
     },
     enabled: !!username,
@@ -57,6 +59,7 @@ const PublicProfileContent = ({
     queryKey: ["public-categories", username],
     queryFn: async () => {
       if (!username) throw new Error("Username is required");
+      console.log('Fetching categories for username:', username);
 
       const { data, error } = await supabase
         .from("categories")
@@ -64,6 +67,7 @@ const PublicProfileContent = ({
         .order('created_at', { ascending: true });
 
       if (error) throw error;
+      console.log('Categories data:', data);
       return data || [];
     },
     enabled: !!username && isParamSet,
@@ -74,6 +78,7 @@ const PublicProfileContent = ({
     queryKey: ["public-products", username, profileData?.id],
     queryFn: async () => {
       if (!username || !profileData?.id) throw new Error("Username and profile ID are required");
+      console.log('Fetching products for profile ID:', profileData.id);
 
       // First, fetch all products from the database
       const { data: productsData, error: productsError } = await supabase
@@ -82,6 +87,7 @@ const PublicProfileContent = ({
         .order('created_at', { ascending: true });
 
       if (productsError) throw productsError;
+      console.log('Products data:', productsData);
 
       // Then, fetch the list of files from public-profiles storage
       const { data: storageFiles, error: storageError } = await supabase.storage
@@ -92,6 +98,7 @@ const PublicProfileContent = ({
         console.error("Error fetching storage files:", storageError);
         return productsData;
       }
+      console.log('Storage files:', storageFiles);
 
       // Map products to include public URLs for images
       const productsWithPublicUrls = productsData.map(product => {
@@ -103,13 +110,14 @@ const PublicProfileContent = ({
             const { data: { publicUrl } } = supabase.storage
               .from("public-profiles")
               .getPublicUrl(`${profileData.id}/${fileName}`);
-            
+            console.log('Public URL for product:', publicUrl);
             return { ...product, image_url: publicUrl };
           }
         }
         return product;
       });
 
+      console.log('Products with public URLs:', productsWithPublicUrls);
       return productsWithPublicUrls;
     },
     enabled: !!username && isParamSet && !!profileData?.id,
