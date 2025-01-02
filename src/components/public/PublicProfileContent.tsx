@@ -37,6 +37,24 @@ const PublicProfileContent = ({
     setUsernameParam();
   }, [username]);
 
+  // Fetch profile data including theme customization
+  const { data: profileData } = useQuery({
+    queryKey: ["public-profile", username],
+    queryFn: async () => {
+      if (!username) throw new Error("Username is required");
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("username", username)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!username,
+  });
+
   // Fetch user ID for the given username
   const { data: userData } = useQuery({
     queryKey: ["public-user", username],
@@ -125,12 +143,22 @@ const PublicProfileContent = ({
     );
   }
 
+  // Apply theme customization from profile data
+  const containerStyle = {
+    backgroundColor: profileData?.background_color || '#FFFFFF',
+    minHeight: '100vh',
+  };
+
+  const accentColor = profileData?.theme_color || '#6B4E9B';
+
   return (
-    <div className="min-h-screen bg-background">
+    <div style={containerStyle}>
       <div className="container py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <header className="flex flex-col sm:flex-row sm:items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">{username}'s stash</h1>
+            <h1 className="text-3xl font-bold tracking-tight" style={{ color: accentColor }}>
+              {username}'s stash
+            </h1>
             <p className="mt-1 text-sm text-muted-foreground">
               Check out my favorite products
             </p>
@@ -143,6 +171,7 @@ const PublicProfileContent = ({
             onClick={() => navigate("/auth")}
             className="mt-4 sm:mt-0"
             size="sm"
+            style={{ backgroundColor: accentColor }}
           >
             <Plus className="mr-2 h-4 w-4" />
             Create Your Own Stash
@@ -161,18 +190,18 @@ const PublicProfileContent = ({
 
             return (
               <div key={category.id} className="space-y-4">
-                <div className="flex items-center justify-between px-4 py-2 bg-muted rounded-lg">
+                <div className="flex items-center justify-between px-4 py-2 rounded-lg" style={{ backgroundColor: `${accentColor}20` }}>
                   <div className="flex items-center gap-2">
-                    <h2 className="text-lg font-semibold">{category.name}</h2>
+                    <h2 className="text-lg font-semibold" style={{ color: accentColor }}>{category.name}</h2>
                     <span className="px-2 py-1 text-xs rounded-full bg-secondary">
                       {categoryProducts.length} items
                     </span>
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className={`grid gap-6 ${profileData?.layout_style === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
                   {categoryProducts.map((product) => (
-                    <PublicProductCard key={product.id} product={product} />
+                    <PublicProductCard key={product.id} product={product} accentColor={accentColor} />
                   ))}
                 </div>
               </div>
