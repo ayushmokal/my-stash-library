@@ -1,10 +1,8 @@
-import { useNavigate } from "react-router-dom";
-import { Eye, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import PublicProductCard from "./PublicProductCard";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import PublicHeader from "./PublicHeader";
+import PublicCategorySection from "./PublicCategorySection";
 
 interface PublicProfileContentProps {
   username: string | null;
@@ -15,7 +13,6 @@ const PublicProfileContent = ({
   username,
   viewCount,
 }: PublicProfileContentProps) => {
-  const navigate = useNavigate();
   const [isParamSet, setIsParamSet] = useState(false);
 
   // Set the username parameter for RLS policies
@@ -140,29 +137,11 @@ const PublicProfileContent = ({
   return (
     <div style={containerStyle}>
       <div className="container py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <header className="flex flex-col sm:flex-row sm:items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight" style={{ color: accentColor }}>
-              {username}'s stash
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Check out my favorite products
-            </p>
-            <div className="flex items-center gap-2 mt-2 text-muted-foreground">
-              <Eye className="h-4 w-4" />
-              <span className="text-sm">{viewCount} views</span>
-            </div>
-          </div>
-          <Button 
-            onClick={() => navigate("/auth")}
-            className="mt-4 sm:mt-0"
-            size="sm"
-            style={{ backgroundColor: accentColor }}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Create Your Own Stash
-          </Button>
-        </header>
+        <PublicHeader 
+          username={username} 
+          viewCount={viewCount} 
+          accentColor={accentColor}
+        />
 
         <div className="space-y-8">
           {categories.map((category) => {
@@ -170,27 +149,13 @@ const PublicProfileContent = ({
               (product) => product.category_id === category.id
             );
 
-            if (categoryProducts.length === 0) {
-              return null;
-            }
-
             return (
-              <div key={category.id} className="space-y-4">
-                <div className="flex items-center justify-between px-4 py-2 rounded-lg" style={{ backgroundColor: `${accentColor}20` }}>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-lg font-semibold" style={{ color: accentColor }}>{category.name}</h2>
-                    <span className="px-2 py-1 text-xs rounded-full bg-secondary">
-                      {categoryProducts.length} items
-                    </span>
-                  </div>
-                </div>
-                
-                <div className={`grid gap-6 ${profileData?.layout_style === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
-                  {categoryProducts.map((product) => (
-                    <PublicProductCard key={product.id} product={product} accentColor={accentColor} />
-                  ))}
-                </div>
-              </div>
+              <PublicCategorySection
+                key={category.id}
+                category={category}
+                products={categoryProducts}
+                accentColor={accentColor}
+              />
             );
           })}
         </div>
