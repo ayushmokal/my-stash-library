@@ -19,12 +19,15 @@ const PublicProfileContent = ({
 
   // Set the username parameter for RLS policies
   useEffect(() => {
-    if (username) {
-      supabase.rpc('set_request_parameter', {
-        name: 'username',
-        value: username
-      });
-    }
+    const setUsernameParam = async () => {
+      if (username) {
+        await supabase.rpc('set_request_parameter', {
+          name: 'username',
+          value: username
+        });
+      }
+    };
+    setUsernameParam();
   }, [username]);
 
   const { data: categories = [] } = useQuery({
