@@ -1,5 +1,5 @@
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { GripVertical } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ExternalLink, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,9 +16,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import ProductMenu from "./ProductMenu";
-import ProductImage from "./ProductImage";
-import ProductActions from "./ProductActions";
-import { copyToPublicStorage, deleteFromStorage } from "@/utils/storage";
 
 interface ProductCardProps {
   product: {
@@ -67,12 +64,6 @@ const ProductCard = ({ product }: ProductCardProps) => {
     };
   }, [queryClient]);
 
-  useEffect(() => {
-    if (product.image_url && user) {
-      copyToPublicStorage(product.image_url, user.id);
-    }
-  }, [product.image_url, user]);
-
   const handleDelete = async () => {
     try {
       const { error } = await supabase
@@ -82,10 +73,16 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
       if (error) throw error;
 
-      if (product.image_url && user) {
+      if (product.image_url) {
         const imagePath = product.image_url.split("/").pop();
         if (imagePath) {
-          await deleteFromStorage(imagePath, user.id);
+          const { error: storageError } = await supabase.storage
+            .from("product-images")
+            .remove([imagePath]);
+
+          if (storageError) {
+            console.error("Error deleting image:", storageError);
+          }
         }
       }
 
@@ -122,17 +119,35 @@ const ProductCard = ({ product }: ProductCardProps) => {
             </div>
           </>
         )}
-        
-        <ProductImage imageUrl={product.image_url} name={product.name} />
-        
+        <div className="relative">
+          {product.image_url && (
+            <div className="aspect-square w-full overflow-hidden">
+              <img
+                src={product.image_url}
+                alt={product.name}
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+            </div>
+          )}
+        </div>
         <CardHeader className="space-y-1">
           <CardTitle className="text-xl line-clamp-2">{product.name}</CardTitle>
           {product.brand && (
             <p className="text-sm text-muted-foreground line-clamp-1">{product.brand}</p>
           )}
         </CardHeader>
-
-        <ProductActions affiliateLink={product.affiliate_link} />
+        {product.affiliate_link && (
+          <CardContent>
+            <a
+              href={product.affiliate_link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800"
+            >
+              Buy now <ExternalLink className="ml-1 h-4 w-4" />
+            </a>
+          </CardContent>
+        )}
       </Card>
 
       <Dialog 
@@ -150,12 +165,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           </DialogHeader>
           <EditProductForm
             product={product}
-            onSuccess={() => {
-              setIsEditDialogOpen(false);
-              if (product.image_url && user) {
-                copyToPublicStorage(product.image_url, user.id);
-              }
-            }}
+            onSuccess={() => setIsEditDialogOpen(false)}
           />
         </DialogContent>
       </Dialog>
