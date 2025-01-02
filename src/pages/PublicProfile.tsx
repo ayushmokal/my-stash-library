@@ -11,27 +11,6 @@ const PublicProfile = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewCount, setViewCount] = useState(0);
-  const [isParamSet, setIsParamSet] = useState(false);
-
-  // Function to set request parameter
-  const setRequestParameter = async (username: string) => {
-    try {
-      const { error: paramError } = await supabase.rpc('set_request_parameter', {
-        name: 'username',
-        value: username
-      });
-
-      if (paramError) {
-        console.error('Error setting username parameter:', paramError);
-        throw paramError;
-      }
-
-      setIsParamSet(true);
-    } catch (err) {
-      console.error('Error in setRequestParameter:', err);
-      setIsParamSet(false);
-    }
-  };
 
   useEffect(() => {
     const initializeProfile = async () => {
@@ -46,31 +25,39 @@ const PublicProfile = () => {
         }
 
         // Set the username parameter
-        await setRequestParameter(username);
+        const { error: paramError } = await supabase.rpc('set_request_parameter', {
+          name: 'username',
+          value: username
+        });
 
-        const { data, error } = await supabase
+        if (paramError) {
+          console.error('Error setting username parameter:', paramError);
+          throw paramError;
+        }
+
+        const { data: profileData, error: profileError } = await supabase
           .from("profiles")
           .select("id")
           .eq("username", username)
           .maybeSingle();
 
-        if (error) {
-          console.error('Error fetching profile:', error);
-          throw error;
+        if (profileError) {
+          console.error('Error fetching profile:', profileError);
+          throw profileError;
         }
         
-        if (!data) {
+        if (!profileData) {
           console.log('No profile found for username:', username);
           setError(`Profile "${username}" not found`);
           return;
         }
 
-        console.log('Found profile:', data);
-        setUserId(data.id);
+        console.log('Found profile:', profileData);
+        setUserId(profileData.id);
 
         // Increment view count
         const { error: incrementError } = await supabase.rpc('increment_profile_views', {
-          profile_id_param: data.id
+          profile_id_param: profileData.id
         });
 
         if (incrementError) {
@@ -81,7 +68,7 @@ const PublicProfile = () => {
         const { data: viewData, error: viewError } = await supabase
           .from('profile_views')
           .select('view_count')
-          .eq('profile_id', data.id)
+          .eq('profile_id', profileData.id)
           .single();
 
         if (!viewError && viewData) {
@@ -102,10 +89,13 @@ const PublicProfile = () => {
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ["public-categories", userId, username],
     queryFn: async () => {
-      if (!userId || !isParamSet) throw new Error("Profile not initialized");
+      if (!userId || !username) throw new Error("Profile not initialized");
 
-      // Refresh the parameter setting before query
-      await setRequestParameter(username || '');
+      // Set the parameter before querying
+      await supabase.rpc('set_request_parameter', {
+        name: 'username',
+        value: username
+      });
 
       const { data, error } = await supabase
         .from("categories")
@@ -120,16 +110,19 @@ const PublicProfile = () => {
 
       return data;
     },
-    enabled: !!userId && !!username && isParamSet,
+    enabled: !!userId && !!username,
   });
 
   const { data: products = [] } = useQuery<Product[]>({
     queryKey: ["public-products", userId, username],
     queryFn: async () => {
-      if (!userId || !isParamSet) throw new Error("Profile not initialized");
+      if (!userId || !username) throw new Error("Profile not initialized");
 
-      // Refresh the parameter setting before query
-      await setRequestParameter(username || '');
+      // Set the parameter before querying
+      await supabase.rpc('set_request_parameter', {
+        name: 'username',
+        value: username
+      });
 
       const { data, error } = await supabase
         .from("products")
@@ -144,7 +137,7 @@ const PublicProfile = () => {
 
       return data;
     },
-    enabled: !!userId && !!username && isParamSet,
+    enabled: !!userId && !!username,
   });
 
   if (isLoading) {
