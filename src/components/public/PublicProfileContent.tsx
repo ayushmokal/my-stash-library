@@ -37,6 +37,24 @@ const PublicProfileContent = ({
     setUsernameParam();
   }, [username]);
 
+  // Fetch user ID for the given username
+  const { data: userData } = useQuery({
+    queryKey: ["public-user", username],
+    queryFn: async () => {
+      if (!username) throw new Error("Username is required");
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("username", username)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!username,
+  });
+
   const { data: categories = [], isLoading: isCategoriesLoading } = useQuery({
     queryKey: ["public-categories", username],
     queryFn: async () => {
@@ -47,11 +65,7 @@ const PublicProfileContent = ({
         .select("*")
         .order('created_at', { ascending: true });
 
-      if (error) {
-        console.error("Error fetching categories:", error);
-        throw error;
-      }
-
+      if (error) throw error;
       return data || [];
     },
     enabled: !!username && isParamSet,
@@ -60,21 +74,43 @@ const PublicProfileContent = ({
   const { data: products = [], isLoading: isProductsLoading } = useQuery({
     queryKey: ["public-products", username],
     queryFn: async () => {
-      if (!username) throw new Error("Username is required");
+      if (!username || !userData?.id) throw new Error("Username and user ID are required");
 
+      // Fetch products from public-profiles storage
+      const { data: storageData, error: storageError } = await supabase.storage
+        .from("public-profiles")
+        .list(userData.id);
+
+      if (storageError) {
+        console.error("Error fetching from storage:", storageError);
+      }
+
+      // Fetch products from database
       const { data, error } = await supabase
         .from("products")
         .select("*")
         .order('created_at', { ascending: true });
 
-      if (error) {
-        console.error("Error fetching products:", error);
-        throw error;
-      }
+      if (error) throw error;
 
-      return data || [];
+      // Merge storage data with database data
+      const productsWithPublicUrls = data.map(product => {
+        if (product.image_url) {
+          const fileName = product.image_url.split('/').pop();
+          const storageFile = storageData?.find(file => file.name === fileName);
+          if (storageFile) {
+            const { data: { publicUrl } } = supabase.storage
+              .from("public-profiles")
+              .getPublicUrl(`${userData.id}/${fileName}`);
+            return { ...product, image_url: publicUrl };
+          }
+        }
+        return product;
+      });
+
+      return productsWithPublicUrls || [];
     },
-    enabled: !!username && isParamSet,
+    enabled: !!username && isParamSet && !!userData?.id,
   });
 
   if (!username) {

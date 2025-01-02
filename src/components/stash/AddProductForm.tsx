@@ -55,6 +55,14 @@ const AddProductForm = () => {
       setUploadProgress(0);
       let imageUrl = values.imageUrl || null;
 
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
       if (!imageUrl && values.image?.[0]) {
         const file = values.image[0];
         const fileExt = file.name.split(".").pop();
@@ -71,29 +79,28 @@ const AddProductForm = () => {
           });
         }, 100);
 
-        const { error: uploadError, data } = await supabase.storage
+        // Upload to product-images bucket
+        const { error: uploadError, data: productImageData } = await supabase.storage
           .from("product-images")
           .upload(filePath, file);
-
-        clearInterval(progressInterval);
-        setUploadProgress(100);
 
         if (uploadError) {
           throw uploadError;
         }
 
         const {
-          data: { publicUrl },
+          data: { publicUrl: productImageUrl },
         } = supabase.storage.from("product-images").getPublicUrl(filePath);
-        imageUrl = publicUrl;
-      }
+        imageUrl = productImageUrl;
 
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+        // Also upload to public-profiles bucket for public access
+        const publicProfilePath = `${user.id}/${filePath}`;
+        await supabase.storage
+          .from("public-profiles")
+          .upload(publicProfilePath, file);
 
-      if (!user) {
-        throw new Error("User not authenticated");
+        clearInterval(progressInterval);
+        setUploadProgress(100);
       }
 
       // Get the highest position for this category
