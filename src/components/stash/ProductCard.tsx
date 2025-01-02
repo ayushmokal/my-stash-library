@@ -64,6 +64,45 @@ const ProductCard = ({ product }: ProductCardProps) => {
     };
   }, [queryClient]);
 
+  const copyToPublicStorage = async () => {
+    if (!product.image_url || !user) return;
+
+    try {
+      // Get the original file name from the product image URL
+      const fileName = product.image_url.split('/').pop();
+      if (!fileName) return;
+
+      // Download the file from product-images bucket
+      const { data: fileData, error: downloadError } = await supabase.storage
+        .from('product-images')
+        .download(fileName);
+
+      if (downloadError) {
+        console.error('Error downloading file:', downloadError);
+        return;
+      }
+
+      // Upload to public-profiles bucket under user's folder
+      const { error: uploadError } = await supabase.storage
+        .from('public-profiles')
+        .upload(`${user.id}/${fileName}`, fileData, {
+          upsert: true
+        });
+
+      if (uploadError) {
+        console.error('Error uploading to public storage:', uploadError);
+      }
+    } catch (error) {
+      console.error('Error copying to public storage:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (product.image_url) {
+      copyToPublicStorage();
+    }
+  }, [product.image_url]);
+
   const handleDelete = async () => {
     try {
       const { error } = await supabase
@@ -76,12 +115,17 @@ const ProductCard = ({ product }: ProductCardProps) => {
       if (product.image_url) {
         const imagePath = product.image_url.split("/").pop();
         if (imagePath) {
+          // Delete from both storage buckets
           const { error: storageError } = await supabase.storage
             .from("product-images")
             .remove([imagePath]);
 
-          if (storageError) {
-            console.error("Error deleting image:", storageError);
+          const { error: publicStorageError } = await supabase.storage
+            .from("public-profiles")
+            .remove([`${user?.id}/${imagePath}`]);
+
+          if (storageError || publicStorageError) {
+            console.error("Error deleting images:", { storageError, publicStorageError });
           }
         }
       }
@@ -165,7 +209,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
           </DialogHeader>
           <EditProductForm
             product={product}
-            onSuccess={() => setIsEditDialogOpen(false)}
+            onSuccess={() => {
+              setIsEditDialogOpen(false);
+              copyToPublicStorage(); // Copy to public storage after edit
+            }}
           />
         </DialogContent>
       </Dialog>
