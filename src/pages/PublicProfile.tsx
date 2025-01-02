@@ -24,6 +24,7 @@ const PublicProfile = () => {
           return;
         }
 
+        // Set the username parameter first
         const { error: paramError } = await supabase.rpc('set_request_parameter', {
           name: 'username',
           value: username
@@ -33,6 +34,9 @@ const PublicProfile = () => {
           console.error('Error setting username parameter:', paramError);
           throw paramError;
         }
+
+        // Wait a brief moment to ensure the parameter is set
+        await new Promise(resolve => setTimeout(resolve, 100));
 
         const { data, error } = await supabase
           .from("profiles")
@@ -92,6 +96,12 @@ const PublicProfile = () => {
     queryFn: async () => {
       if (!userId) throw new Error("User ID is required");
 
+      // Ensure the username parameter is set before querying
+      await supabase.rpc('set_request_parameter', {
+        name: 'username',
+        value: username || ''
+      });
+
       const { data, error } = await supabase
         .from("categories")
         .select("*")
@@ -101,13 +111,19 @@ const PublicProfile = () => {
       if (error) throw error;
       return data;
     },
-    enabled: !!userId,
+    enabled: !!userId && !!username,
   });
 
   const { data: products = [] } = useQuery<Product[]>({
     queryKey: ["public-products", userId],
     queryFn: async () => {
       if (!userId) throw new Error("User ID is required");
+
+      // Ensure the username parameter is set before querying
+      await supabase.rpc('set_request_parameter', {
+        name: 'username',
+        value: username || ''
+      });
 
       const { data, error } = await supabase
         .from("products")
@@ -118,7 +134,7 @@ const PublicProfile = () => {
       if (error) throw error;
       return data;
     },
-    enabled: !!userId,
+    enabled: !!userId && !!username,
   });
 
   if (isLoading) {
