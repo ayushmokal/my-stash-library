@@ -25,6 +25,7 @@ const PublicProfileContent = ({
             value: username
           });
           setIsParamSet(true);
+          console.log('Username parameter set successfully:', username);
         } catch (error) {
           console.error("Error setting username parameter:", error);
           setIsParamSet(false);
@@ -73,54 +74,39 @@ const PublicProfileContent = ({
     enabled: !!username && isParamSet,
   });
 
-  // Fetch products with public URLs
+  // Fetch products
   const { data: products = [], isLoading: isProductsLoading } = useQuery({
-    queryKey: ["public-products", username, profileData?.id],
+    queryKey: ["public-products", username],
     queryFn: async () => {
-      if (!username || !profileData?.id) throw new Error("Username and profile ID are required");
-      console.log('Fetching products for profile ID:', profileData.id);
+      if (!username) throw new Error("Username is required");
+      console.log('Fetching products for username:', username);
 
-      // First, fetch all products from the database
       const { data: productsData, error: productsError } = await supabase
         .from("products")
         .select("*")
-        .order('created_at', { ascending: true });
+        .order('position', { ascending: true });
 
       if (productsError) throw productsError;
       console.log('Products data:', productsData);
 
-      // Then, fetch the list of files from public-profiles storage
-      const { data: storageFiles, error: storageError } = await supabase.storage
-        .from("public-profiles")
-        .list(profileData.id);
+      // If there are no products, return empty array
+      if (!productsData) return [];
 
-      if (storageError) {
-        console.error("Error fetching storage files:", storageError);
-        return productsData;
-      }
-      console.log('Storage files:', storageFiles);
-
-      // Map products to include public URLs for images
-      const productsWithPublicUrls = productsData.map(product => {
+      // Get public URLs for product images
+      const productsWithPublicUrls = await Promise.all(productsData.map(async (product) => {
         if (product.image_url) {
-          const fileName = product.image_url.split('/').pop();
-          const matchingFile = storageFiles.find(file => file.name === fileName);
-          
-          if (matchingFile) {
-            const { data: { publicUrl } } = supabase.storage
-              .from("public-profiles")
-              .getPublicUrl(`${profileData.id}/${fileName}`);
-            console.log('Public URL for product:', publicUrl);
-            return { ...product, image_url: publicUrl };
-          }
+          const { data: { publicUrl } } = supabase.storage
+            .from("public-profiles")
+            .getPublicUrl(product.image_url);
+          return { ...product, image_url: publicUrl };
         }
         return product;
-      });
+      }));
 
       console.log('Products with public URLs:', productsWithPublicUrls);
       return productsWithPublicUrls;
     },
-    enabled: !!username && isParamSet && !!profileData?.id,
+    enabled: !!username && isParamSet,
   });
 
   if (!username) {
