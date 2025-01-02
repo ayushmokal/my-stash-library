@@ -51,9 +51,10 @@ const PublicProfileContent = ({
         throw error;
       }
 
-      return data;
+      return data || [];
     },
     enabled: !!username,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 
   const { data: products = [], isLoading: isProductsLoading } = useQuery({
@@ -77,9 +78,10 @@ const PublicProfileContent = ({
         throw error;
       }
 
-      return data;
+      return data || [];
     },
     enabled: !!username,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 
   if (!username) {
