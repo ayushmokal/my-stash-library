@@ -13,6 +13,26 @@ const PublicProfile = () => {
   const [viewCount, setViewCount] = useState(0);
   const [isParamSet, setIsParamSet] = useState(false);
 
+  // Function to set request parameter
+  const setRequestParameter = async (username: string) => {
+    try {
+      const { error: paramError } = await supabase.rpc('set_request_parameter', {
+        name: 'username',
+        value: username
+      });
+
+      if (paramError) {
+        console.error('Error setting username parameter:', paramError);
+        throw paramError;
+      }
+
+      setIsParamSet(true);
+    } catch (err) {
+      console.error('Error in setRequestParameter:', err);
+      setIsParamSet(false);
+    }
+  };
+
   useEffect(() => {
     const initializeProfile = async () => {
       try {
@@ -25,19 +45,8 @@ const PublicProfile = () => {
           return;
         }
 
-        // Set the username parameter and wait for confirmation
-        const { error: paramError } = await supabase.rpc('set_request_parameter', {
-          name: 'username',
-          value: username
-        });
-
-        if (paramError) {
-          console.error('Error setting username parameter:', paramError);
-          throw paramError;
-        }
-
-        // Mark parameter as set
-        setIsParamSet(true);
+        // Set the username parameter
+        await setRequestParameter(username);
 
         const { data, error } = await supabase
           .from("profiles")
@@ -96,10 +105,7 @@ const PublicProfile = () => {
       if (!userId || !isParamSet) throw new Error("Profile not initialized");
 
       // Refresh the parameter setting before query
-      await supabase.rpc('set_request_parameter', {
-        name: 'username',
-        value: username || ''
-      });
+      await setRequestParameter(username || '');
 
       const { data, error } = await supabase
         .from("categories")
@@ -123,10 +129,7 @@ const PublicProfile = () => {
       if (!userId || !isParamSet) throw new Error("Profile not initialized");
 
       // Refresh the parameter setting before query
-      await supabase.rpc('set_request_parameter', {
-        name: 'username',
-        value: username || ''
-      });
+      await setRequestParameter(username || '');
 
       const { data, error } = await supabase
         .from("products")
