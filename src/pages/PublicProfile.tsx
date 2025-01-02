@@ -10,6 +10,7 @@ const PublicProfile = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewCount, setViewCount] = useState(0);
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -60,6 +61,17 @@ const PublicProfile = () => {
 
         if (incrementError) {
           console.error('Error incrementing view count:', incrementError);
+        }
+
+        // Fetch view count
+        const { data: viewData, error: viewError } = await supabase
+          .from('profile_views')
+          .select('view_count')
+          .eq('profile_id', data.id)
+          .single();
+
+        if (!viewError && viewData) {
+          setViewCount(viewData.view_count);
         }
 
       } catch (err: any) {
@@ -138,7 +150,7 @@ const PublicProfile = () => {
       username={username}
       categories={categories}
       products={products}
-      userId={userId}
+      viewCount={viewCount}
     />
   );
 };

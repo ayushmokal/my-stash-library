@@ -9,6 +9,7 @@ interface PublicProfileContentProps {
   categories: any[];
   products: any[];
   viewCount: number;
+  userId?: string; // Added userId as optional prop
 }
 
 const PublicProfileContent = ({
@@ -68,7 +69,7 @@ const PublicProfileContent = ({
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {categoryProducts.map((product) => (
                     <PublicProductCard key={product.id} product={product} />
                   ))}
