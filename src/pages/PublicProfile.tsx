@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
 import PublicProfileContent from "@/components/public/PublicProfileContent";
-import { Product, Category } from "@/types/product";
 
 const PublicProfile = () => {
   const { username } = useParams();
@@ -81,58 +79,6 @@ const PublicProfile = () => {
     initializeProfile();
   }, [username]);
 
-  const { data: categories = [] } = useQuery<Category[]>({
-    queryKey: ["public-categories", username],
-    queryFn: async () => {
-      if (!username) throw new Error("Username is required");
-
-      // Set username parameter before querying
-      await supabase.rpc('set_request_parameter', {
-        name: 'username',
-        value: username
-      });
-
-      const { data, error } = await supabase
-        .from("categories")
-        .select("*")
-        .order('created_at', { ascending: true });
-
-      if (error) {
-        console.error("Error fetching categories:", error);
-        throw error;
-      }
-
-      return data;
-    },
-    enabled: !!username,
-  });
-
-  const { data: products = [] } = useQuery<Product[]>({
-    queryKey: ["public-products", username],
-    queryFn: async () => {
-      if (!username) throw new Error("Username is required");
-
-      // Set username parameter before querying
-      await supabase.rpc('set_request_parameter', {
-        name: 'username',
-        value: username
-      });
-
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .order('created_at', { ascending: true });
-
-      if (error) {
-        console.error("Error fetching products:", error);
-        throw error;
-      }
-
-      return data;
-    },
-    enabled: !!username,
-  });
-
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -152,8 +98,6 @@ const PublicProfile = () => {
   return (
     <PublicProfileContent
       username={username}
-      categories={categories}
-      products={products}
       viewCount={viewCount}
     />
   );
